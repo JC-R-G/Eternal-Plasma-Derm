@@ -7,9 +7,9 @@ const SUPABASE_ANON_KEY = "sb_publishable_oavikFmXuEZM5FR0fyMaew_KXnZAivY";
 const ADMIN_PASSWORD = "eternaladmin2026";
 
 // DATOS DE MERCADO PAGO Y CONTACTO (Modificá estos valores)
-const MP_ALIAS = "eternal.plasma.mp"; // Tu alias de Mercado Pago
-const SENA_VALOR = "$5.000";          // Monto de la seña
-const WHATSAPP_NUMERO = "5492641234567"; // Número para recibir el comprobante
+const MP_ALIAS = "patogil.mp"; // Tu alias de Mercado Pago
+const SENA_VALOR = "$20.000";          // Monto de la seña
+const WHATSAPP_NUMERO = "5492645447043"; // Número para recibir el comprobante
 
 // Esquema de horarios según el día
 const HORARIOS_SEMANA = ["16:00", "17:15", "18:30", "19:45"];
