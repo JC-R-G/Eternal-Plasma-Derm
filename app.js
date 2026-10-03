@@ -6,7 +6,7 @@ const SUPABASE_URL = "https://izmumxhupaybploxfbft.supabase.co";
 const SUPABASE_KEY = "sb_publishable_oavikFmXuEZM5FR0fyMaew_KXnZAivY";
 const ADMIN_PASSWORD = "eternaladmin2026";
 
-// DATOS DE MERCADO PAGO Y CONTACTO (Ajustá con tus datos si querés)
+// DATOS DE MERCADO PAGO Y CONTACTO
 const MP_ALIAS = "eternal.plasma.mp";
 const SENA_VALOR = "$5.000";
 const WHATSAPP_NUMERO = "5492641234567";
@@ -15,14 +15,13 @@ const WHATSAPP_NUMERO = "5492641234567";
 const HORARIOS_SEMANA = ["16:00", "17:15", "18:30", "19:45"];
 const HORARIOS_SABADO = ["09:30", "11:00", "12:30", "15:00", "16:30", "18:00", "19:30"];
 
-// Cliente API directo para máxima compatibilidad con las nuevas Publishable Keys
+// Cliente REST nativo configurado para las nuevas Publishable Keys (solo header apikey)
 const db = {
   async getBookedTimes(dateStr) {
     const res = await fetch(`${SUPABASE_URL}/rest/v1/appointments?appointment_date=eq.${dateStr}&select=appointment_time`, {
       method: "GET",
       headers: {
-        "apikey": SUPABASE_KEY,
-        "Authorization": `Bearer ${SUPABASE_KEY}`
+        "apikey": SUPABASE_KEY
       }
     });
     if (!res.ok) throw new Error(await res.text());
@@ -35,7 +34,6 @@ const db = {
       method: "POST",
       headers: {
         "apikey": SUPABASE_KEY,
-        "Authorization": `Bearer ${SUPABASE_KEY}`,
         "Content-Type": "application/json",
         "Prefer": "return=representation"
       },
@@ -52,8 +50,7 @@ const db = {
     const res = await fetch(`${SUPABASE_URL}/rest/v1/appointments?select=*&order=appointment_date.asc,appointment_time.asc`, {
       method: "GET",
       headers: {
-        "apikey": SUPABASE_KEY,
-        "Authorization": `Bearer ${SUPABASE_KEY}`
+        "apikey": SUPABASE_KEY
       }
     });
     if (!res.ok) throw new Error(await res.text());
@@ -65,7 +62,6 @@ const db = {
       method: "PATCH",
       headers: {
         "apikey": SUPABASE_KEY,
-        "Authorization": `Bearer ${SUPABASE_KEY}`,
         "Content-Type": "application/json"
       },
       body: JSON.stringify({ status: newStatus })
@@ -77,8 +73,7 @@ const db = {
     const res = await fetch(`${SUPABASE_URL}/rest/v1/appointments?id=eq.${id}`, {
       method: "DELETE",
       headers: {
-        "apikey": SUPABASE_KEY,
-        "Authorization": `Bearer ${SUPABASE_KEY}`
+        "apikey": SUPABASE_KEY
       }
     });
     if (!res.ok) throw new Error(await res.text());
@@ -406,7 +401,7 @@ document.addEventListener("DOMContentLoaded", () => {
         </div>
       `;
 
-      // Evento: Confirmar seña del turno
+      // Evento: Confirmar seña
       const confirmBtn = card.querySelector('.confirm-btn');
       if (confirmBtn) {
         confirmBtn.addEventListener('click', async () => {
@@ -425,7 +420,7 @@ document.addEventListener("DOMContentLoaded", () => {
         });
       }
 
-      // Evento: Liberar / Borrar el turno para que vuelva a estar disponible
+      // Evento: Liberar horario
       const deleteBtn = card.querySelector('.delete-btn');
       if (deleteBtn) {
         deleteBtn.addEventListener('click', async () => {
