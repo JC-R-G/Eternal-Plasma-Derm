@@ -3,7 +3,7 @@
    ============================================================ */
 
 const SUPABASE_URL = "https://izmumxhupaybploxfbft.supabase.co";
-const SUPABASE_ANON_KEY = "sb_publishable_oavikFmXuEZM5FROfyMaew_KXnZAivY";
+const SUPABASE_ANON_KEY = "sb_publishable_oavikFmXuEZM5FR0fyMaew_KXnZAivY";
 const ADMIN_PASSWORD = "eternaladmin2026";
 
 // DATOS DE MERCADO PAGO Y CONTACTO (Modificá con tus datos reales)
@@ -51,6 +51,7 @@ document.addEventListener("DOMContentLoaded", () => {
   const bookingForm = document.getElementById("bookingForm");
   const bookingSuccessMessage = document.getElementById("bookingSuccessMessage");
 
+  // Elementos de Admin
   const adminModal = document.getElementById("adminModal");
   const openAdminBtn = document.getElementById("openAdminBtn");
   const closeAdminBtn = document.getElementById("closeAdminBtn");
@@ -261,9 +262,20 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 
-  // Panel Admin
-  if (openAdminBtn && adminModal) openAdminBtn.addEventListener("click", () => adminModal.classList.remove("hidden"));
-  if (closeAdminBtn && adminModal) closeAdminBtn.addEventListener("click", () => adminModal.classList.add("hidden"));
+  // ============================================================
+  // PANEL DE ADMINISTRACIÓN MEJORADO (LIBERAR / CONFIRMAR)
+  // ============================================================
+  if (openAdminBtn && adminModal) {
+    openAdminBtn.addEventListener("click", () => {
+      adminModal.classList.remove("hidden");
+    });
+  }
+
+  if (closeAdminBtn && adminModal) {
+    closeAdminBtn.addEventListener("click", () => {
+      adminModal.classList.add("hidden");
+    });
+  }
 
   if (adminLoginBtn) {
     adminLoginBtn.addEventListener("click", () => {
@@ -279,11 +291,14 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 
-  if (refreshAdminBtn) refreshAdminBtn.addEventListener("click", fetchAdminAppointments);
+  if (refreshAdminBtn) {
+    refreshAdminBtn.addEventListener("click", fetchAdminAppointments);
+  }
 
+  // Función para obtener y listar turnos en el Panel Admin
   async function fetchAdminAppointments() {
     if (!adminAppointmentsList) return;
-    adminAppointmentsList.innerHTML = `<p class="text-xs text-stone-400 py-4 text-center">Cargando reservas...</p>`;
+    adminAppointmentsList.innerHTML = `<p class="text-xs text-stone-400 py-6 text-center">Cargando reservas desde la base de datos...</p>`;
 
     let list = [];
     if (supabaseClient) {
@@ -301,37 +316,118 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     if (list.length === 0) {
-      adminAppointmentsList.innerHTML = `<p class="text-xs text-stone-400 py-4 text-center">No hay turnos registrados aún.</p>`;
+      adminAppointmentsList.innerHTML = `<div class="p-8 text-center text-xs text-stone-400 bg-stone-50 rounded-2xl border border-dashed border-stone-200">No hay turnos registrados en este momento.</div>`;
       return;
     }
 
     adminAppointmentsList.innerHTML = "";
     list.forEach(app => {
       const card = document.createElement("div");
-      card.className = "p-3.5 bg-stone-50 rounded-xl border border-stone-200 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs";
+      card.className = "p-4 bg-white rounded-2xl border border-stone-200 shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-4 text-xs transition hover:border-[#A67C52]/40";
       
       const cleanPhone = app.client_phone ? app.client_phone.replace(/\D/g, '') : '';
-      const waUrl = `https://wa.me/${cleanPhone}?text=${encodeURIComponent(`Hola ${app.client_name}, te escribimos de Eternal Plasma Derm para avisarte que recibimos tu seña y tu turno del ${app.appointment_date} a las${app.appointment_time} hs está 100% confirmado.`)}`;
+      const waUrl = `https://wa.me/${cleanPhone}?text=${encodeURIComponent(`Hola ${app.client_name}, te escribimos de Eternal Plasma Derm sobre tu turno del ${app.appointment_date} a las${app.appointment_time} hs.`)}`;
+
+      const isPending = app.status === 'pendiente_sena';
 
       card.innerHTML = `
-        <div>
-          <div class="flex items-center gap-2">
-            <span class="font-bold text-stone-900">${app.client_name}</span>
-            <span class="px-2 py-0.5 rounded bg-[#FAF8F5] border border-stone-300 text-stone-600 font-medium">${app.appointment_date} · ${app.appointment_time} hs</span>
-            <span class="px-2 py-0.5 rounded text-[10px] font-semibold ${app.status === 'pendiente_sena' ? 'bg-amber-100 text-amber-800' : 'bg-emerald-100 text-emerald-800'}">
-              ${app.status === 'pendiente_sena' ? 'Pendiente Seña' : 'Confirmado'}
+        <div class="space-y-1.5 flex-1">
+          <div class="flex items-center gap-2 flex-wrap">
+            <span class="font-bold text-sm text-stone-900">${app.client_name}</span>
+            <span class="px-2.5 py-0.5 rounded-full bg-[#FAF8F5] border border-stone-300 text-stone-700 font-semibold text-[11px]">
+              📅 ${app.appointment_date} · ⏰ ${app.appointment_time} hs
+            </span>
+            <span class="px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider ${isPending ? 'bg-amber-100 text-amber-800 border border-amber-200' : 'bg-emerald-100 text-emerald-800 border border-emerald-200'}">
+              ${isPending ? '⏳ Pendiente Seña' : '✅ Confirmado'}
             </span>
           </div>
-          <div class="text-stone-500 mt-1">
-            <span>Tratamiento: <strong class="text-stone-700">${app.treatment}</strong></span> · Tel: ${app.client_phone}
+
+          <div class="text-stone-600 flex flex-wrap gap-x-4 gap-y-1 text-xs">
+            <span>Tratamiento: <strong class="text-stone-800 font-medium">${app.treatment}</strong></span>
+            <span>Teléfono: <strong class="text-stone-800 font-medium">${app.client_phone}</strong></span>
           </div>
         </div>
-        <div>
-          <a href="${waUrl}" target="_blank" rel="noopener" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-emerald-600 text-white font-medium hover:bg-emerald-700 transition">
-            Confirmar por WhatsApp
+
+        <div class="flex items-center gap-2 flex-wrap sm:flex-nowrap justify-end">
+          <a href="${waUrl}" target="_blank" rel="noopener" class="px-3 py-2 rounded-xl bg-stone-100 hover:bg-stone-200 text-stone-700 font-medium transition flex items-center gap-1.5">
+            💬 WhatsApp
           </a>
+
+          ${isPending ? `
+            <button class="confirm-btn px-3 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-medium transition" data-id="${app.id}">
+              Confirmar Seña
+            </button>
+          ` : ''}
+
+          <button class="delete-btn px-3 py-2 rounded-xl bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200 font-medium transition flex items-center gap-1" data-id="${app.id}" data-date="${app.appointment_date}" data-time="${app.appointment_time}" data-name="${app.client_name}">
+            🗑️ Liberar Horario
+          </button>
         </div>
       `;
+
+      // Evento: Confirmar seña del turno
+      const confirmBtn = card.querySelector('.confirm-btn');
+      if (confirmBtn) {
+        confirmBtn.addEventListener('click', async () => {
+          const appointmentId = confirmBtn.getAttribute('data-id');
+          confirmBtn.disabled = true;
+          confirmBtn.textContent = 'Actualizando...';
+
+          try {
+            const { error } = await supabaseClient
+              .from('appointments')
+              .update({ status: 'confirmed' })
+              .eq('id', appointmentId);
+
+            if (error) throw error;
+            fetchAdminAppointments();
+          } catch (err) {
+            alert('Error al confirmar: ' + err.message);
+            confirmBtn.disabled = false;
+            confirmBtn.textContent = 'Confirmar Seña';
+          }
+        });
+      }
+
+      // Evento: Liberar / Borrar el turno para que vuelva a estar disponible
+      const deleteBtn = card.querySelector('.delete-btn');
+      if (deleteBtn) {
+        deleteBtn.addEventListener('click', async () => {
+          const appointmentId = deleteBtn.getAttribute('data-id');
+          const date = deleteBtn.getAttribute('data-date');
+          const time = deleteBtn.getAttribute('data-time');
+          const clientName = deleteBtn.getAttribute('data-name');
+
+          const seguro = confirm(`¿Estás seguro de que querés liberar el turno de las ${time} hs (${date}) reservado por "${clientName}"?\n\nEl horario volverá a figurar disponible para todo el público.`);
+          
+          if (!seguro) return;
+
+          deleteBtn.disabled = true;
+          deleteBtn.textContent = 'Liberando...';
+
+          try {
+            const { error } = await supabaseClient
+              .from('appointments')
+              .delete()
+              .eq('id', appointmentId);
+
+            if (error) throw error;
+
+            // Recargar lista admin y refrescar la vista del calendario
+            fetchAdminAppointments();
+            if (selectedDateString === date) {
+              const dateParts = date.split('-');
+              const dayIdx = new Date(dateParts[0], dateParts[1] - 1, dateParts[2]).getDay();
+              loadAvailableSlots(date, dayIdx);
+            }
+          } catch (err) {
+            alert('Error al liberar turno: ' + err.message);
+            deleteBtn.disabled = false;
+            deleteBtn.textContent = '🗑️ Liberar Horario';
+          }
+        });
+      }
+
       adminAppointmentsList.appendChild(card);
     });
   }
