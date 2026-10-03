@@ -9,7 +9,7 @@ const ADMIN_PASSWORD = "eternaladmin2026";
 // DATOS DE MERCADO PAGO Y CONTACTO (Modificá con tus datos reales)
 const MP_ALIAS = "patogil.mp";      // Tu alias de Mercado Pago
 const SENA_VALOR = "$25.000";               // Monto de la seña
-const WHATSAPP_NUMERO = "5492641234567";   // Tu número de WhatsApp sin signos ni espacios
+const WHATSAPP_NUMERO = "5492645447043";   // Tu número de WhatsApp sin signos ni espacios
 
 // Esquema de horarios según el día
 const HORARIOS_SEMANA = ["16:00", "17:15", "18:30", "19:45"];
