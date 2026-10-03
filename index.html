@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html lang="es" class="scroll-smooth">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Eternal Plasma Derm | Estética Avanzada y Plasma Pen</title>
+  <meta name="description" content="Tratamientos faciales no invasivos con Plasma Pen y rejuvenecimiento en Eternal Plasma Derm.">
+  
+  <!-- Tipografía Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;600;700&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  
+  <!-- Tailwind CSS CDN para maquetación rápida -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  
+  <!-- Supabase JS Client -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  
+  <!-- Estilos propios personalizados -->
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body class="bg-[#FAF8F5] text-stone-800 antialiased min-h-screen flex flex-col justify-between">
+
+  <!-- NAVBAR -->
+  <header class="sticky top-0 z-40 bg-[#FAF8F5]/90 backdrop-blur-md border-b border-stone-200/70 transition-all">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between">
+      <a href="#inicio" class="flex flex-col">
+        <span class="font-serif text-2xl tracking-widest text-stone-900 font-semibold uppercase">Eternal</span>
+        <span class="text-[10px] tracking-[0.25em] text-[#A67C52] uppercase font-medium -mt-1">Plasma Derm</span>
+      </a>
+
+      <!-- Menú Escritorio -->
+      <nav class="hidden md:flex items-center space-x-8 text-sm font-medium text-stone-600">
+        <a href="#inicio" class="hover:text-[#A67C52] transition">Inicio</a>
+        <a href="#servicios" class="hover:text-[#A67C52] transition">Tratamientos</a>
+        <a href="#galeria" class="hover:text-[#A67C52] transition">Antes & Después</a>
+        <a href="#turnos" class="hover:text-[#A67C52] transition font-semibold text-[#A67C52]">Turnos</a>
+        <a href="#contacto" class="hover:text-[#A67C52] transition">Contacto</a>
+      </nav>
+
+      <div class="flex items-center space-x-3">
+        <a href="#turnos" class="btn-primary text-xs uppercase tracking-wider px-5 py-2.5 rounded-full font-semibold">
+          Reservar Turno
+        </a>
+        <button id="openAdminBtn" title="Acceso Profesional / Admin" class="p-2 text-stone-400 hover:text-stone-700 transition">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/></svg>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- HERO SECTION -->
+  <section id="inicio" class="relative pt-12 pb-20 md:py-28 overflow-hidden bg-gradient-to-b from-stone-100/60 to-[#FAF8F5]">
+    <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 text-center relative z-10">
+      <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#EFE9DF] text-[#7A5B3E] text-xs font-medium uppercase tracking-widest mb-6">
+        <span>✨ Dermoestética y Rejuvenecimiento No Invasivo</span>
+      </div>
+      <h1 class="font-serif text-4xl sm:text-6xl lg:text-7xl font-light text-stone-900 leading-tight mb-6">
+        Precisión clínica, <br class="hidden sm:inline" />
+        <span class="italic font-normal text-[#A67C52]">resultados naturales</span>
+      </h1>
+      <p class="max-w-2xl mx-auto text-stone-600 text-base sm:text-lg mb-10 font-light leading-relaxed">
+        Tecnología Plasma Pen para tensado cutáneo, blefaroplastia sin cirugía y regeneración celular profunda. Tu piel en manos expertas.
+      </p>
+      <div class="flex flex-col sm:flex-row items-center justify-center gap-4">
+        <a href="#turnos" class="btn-primary w-full sm:w-auto px-8 py-3.5 rounded-full font-medium text-sm tracking-wider uppercase shadow-sm">
+          Agendar Cita Online
+        </a>
+        <a href="#servicios" class="w-full sm:w-auto px-8 py-3.5 rounded-full border border-stone-300 text-stone-700 text-sm font-medium hover:bg-stone-50 transition">
+          Ver Tratamientos
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <!-- TRATAMIENTOS -->
+  <section id="servicios" class="py-20 bg-white">
+    <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="text-center max-w-xl mx-auto mb-16">
+        <span class="text-xs uppercase tracking-[0.25em] text-[#A67C52] font-semibold">Especialidades</span>
+        <h2 class="font-serif text-3xl sm:text-4xl text-stone-900 mt-2">Nuestros Tratamientos</h2>
+        <div class="h-0.5 w-12 bg-[#A67C52] mx-auto mt-4"></div>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+        <!-- Tarjeta 1 -->
+        <div class="card p-8 rounded-2xl flex flex-col justify-between">
+          <div>
+            <div class="w-12 h-12 rounded-xl bg-[#F5EFE6] flex items-center justify-center text-[#A67C52] mb-6">
+              <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.6" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.6" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
+            </div>
+            <h3 class="font-serif text-2xl text-stone-900 mb-2">Blefaroplastia No Quirúrgica</h3>
+            <p class="text-sm text-stone-600 leading-relaxed mb-6 font-light">
+              Elevación de párpados caídos y reducción de bolsas perioculares sin cortes ni quirófano.
+            </p>
+          </div>
+          <span class="text-xs font-semibold uppercase tracking-wider text-[#A67C52]">Sesión ~ 60 min</span>
+        </div>
+
+        <!-- Tarjeta 2 -->
+        <div class="card p-8 rounded-2xl flex flex-col justify-between">
+          <div>
+            <div class="w-12 h-12 rounded-xl bg-[#F5EFE6] flex items-center justify-center text-[#A67C52] mb-6">
+              <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.6" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
+            </div>
+            <h3 class="font-serif text-2xl text-stone-900 mb-2">Lifting Plasma Pen</h3>
+            <p class="text-sm text-stone-600 leading-relaxed mb-6 font-light">
+              Estimulación de colágeno para atenuar líneas de expresión, surcos nasogenianos y flacidez cutánea.
+            </p>
+          </div>
+          <span class="text-xs font-semibold uppercase tracking-wider text-[#A67C52]">Sesión ~ 90 min</span>
+        </div>
+
+        <!-- Tarjeta 3 -->
+        <div class="card p-8 rounded-2xl flex flex-col justify-between">
+          <div>
+            <div class="w-12 h-12 rounded-xl bg-[#F5EFE6] flex items-center justify-center text-[#A67C52] mb-6">
+              <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.6" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z"/></svg>
+            </div>
+            <h3 class="font-serif text-2xl text-stone-900 mb-2">Eliminación de Lesiones y Manchas</h3>
+            <p class="text-sm text-stone-600 leading-relaxed mb-6 font-light">
+              Remoción controlada y precisa de puntos rubí, léntigos solares, verrugas benignas y marcas de acné.
+            </p>
+          </div>
+          <span class="text-xs font-semibold uppercase tracking-wider text-[#A67C52]">Sesión ~ 45 min</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- SECCIÓN TURNOS (CALENDARIO Y FORMULARIO) -->
+  <section id="turnos" class="py-20 bg-[#FAF8F5]">
+    <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="text-center max-w-xl mx-auto mb-14">
+        <span class="text-xs uppercase tracking-[0.25em] text-[#A67C52] font-semibold">Reserva tu momento</span>
+        <h2 class="font-serif text-3xl sm:text-4xl text-stone-900 mt-2">Agenda tu Turno</h2>
+        <p class="text-sm text-stone-600 mt-3 font-light">
+          Seleccioná un día del calendario y elegí uno de los horarios disponibles.
+        </p>
+      </div>
+
+      <div class="bg-white rounded-3xl p-6 sm:p-10 shadow-sm border border-stone-200/80 grid grid-cols-1 lg:grid-cols-12 gap-8">
+        
+        <!-- CALENDARIO (COL IZQUIERDA) -->
+        <div class="lg:col-span-6">
+          <div class="flex items-center justify-between mb-6">
+            <h3 id="currentMonthYear" class="font-serif text-xl font-semibold text-stone-900"></h3>
+            <div class="flex space-x-1">
+              <button id="prevMonthBtn" class="p-2 rounded-full hover:bg-stone-100 text-stone-600 transition">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg>
+              </button>
+              <button id="nextMonthBtn" class="p-2 rounded-full hover:bg-stone-100 text-stone-600 transition">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
+              </button>
+            </div>
+          </div>
+
+          <!-- Días de la semana -->
+          <div class="grid grid-cols-7 text-center text-xs font-semibold text-stone-400 mb-2 uppercase tracking-wider">
+            <span>Dom</span><span>Lun</span><span>Mar</span><span>Mié</span><span>Jue</span><span>Vie</span><span>Sáb</span>
+          </div>
+
+          <!-- Grilla de días -->
+          <div id="calendarDays" class="grid grid-cols-7 gap-1"></div>
+        </div>
+
+        <!-- HORARIOS Y FORMULARIO (COL DERECHA) -->
+        <div class="lg:col-span-6 lg:border-l lg:border-stone-100 lg:pl-8 flex flex-col justify-between">
+          <div>
+            <div class="flex items-center justify-between pb-3 border-b border-stone-100 mb-4">
+              <span class="text-xs uppercase tracking-wider text-stone-500 font-semibold">Día seleccionado:</span>
+              <span id="selectedDateLabel" class="text-sm font-semibold text-[#A67C52]">Elegí una fecha</span>
+            </div>
+
+            <div class="mb-6">
+              <span class="text-xs uppercase tracking-wider text-stone-500 font-medium block mb-3">Horarios disponibles:</span>
+              <div id="slotsContainer" class="grid grid-cols-2 sm:grid-cols-3 gap-2.5">
+                <p class="text-xs text-stone-400 col-span-full py-4 text-center">Por favor, seleccioná un día en el calendario.</p>
+              </div>
+            </div>
+
+            <!-- FORMULARIO DE RESERVA -->
+            <form id="bookingForm" class="hidden space-y-3.5 pt-4 border-t border-stone-100">
+              <h4 class="text-xs font-semibold text-stone-900 uppercase tracking-wider">Tus datos para confirmar:</h4>
+              
+              <div>
+                <label class="block text-xs text-stone-600 mb-1">Nombre y Apellido *</label>
+                <input type="text" id="clientName" required placeholder="Ej: Valentina Morales" 
+                       class="w-full text-sm px-3.5 py-2.5 rounded-xl border border-stone-300 focus:outline-none focus:border-[#A67C52] transition">
+              </div>
+
+              <div>
+                <label class="block text-xs text-stone-600 mb-1">WhatsApp / Teléfono *</label>
+                <input type="tel" id="clientPhone" required placeholder="Ej: 264 1234567" 
+                       class="w-full text-sm px-3.5 py-2.5 rounded-xl border border-stone-300 focus:outline-none focus:border-[#A67C52] transition">
+              </div>
+
+              <div>
+                <label class="block text-xs text-stone-600 mb-1">Tratamiento de Interés *</label>
+                <select id="clientTreatment" required class="w-full text-sm px-3.5 py-2.5 rounded-xl border border-stone-300 focus:outline-none focus:border-[#A67C52] bg-white transition">
+                  <option value="">Selecciona un tratamiento...</option>
+                  <option value="Blefaroplastia No Quirúrgica">Blefaroplastia No Quirúrgica</option>
+                  <option value="Lifting Plasma Pen">Lifting Plasma Pen</option>
+                  <option value="Eliminación de Manchas / Puntos Rubí">Eliminación de Manchas / Puntos Rubí</option>
+                  <option value="Evaluación & Consulta General">Evaluación & Consulta General</option>
+                </select>
+              </div>
+
+              <button type="submit" id="submitBookingBtn" class="btn-primary w-full py-3 rounded-xl font-medium text-xs tracking-wider uppercase mt-4">
+                Confirmar Turno
+              </button>
+            </form>
+
+            <div id="bookingSuccessMessage" class="hidden py-8 text-center space-y-2">
+              <div class="w-12 h-12 rounded-full bg-emerald-100 text-emerald-600 mx-auto flex items-center justify-center">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+              </div>
+              <h5 class="font-serif text-xl font-bold text-stone-900">¡Turno Confirmado!</h5>
+              <p class="text-xs text-stone-600">Te contactaremos por WhatsApp con las indicaciones previas al tratamiento.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- MODAL ADMIN -->
+  <div id="adminModal" class="fixed inset-0 bg-stone-900/60 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+    <div class="bg-white rounded-3xl max-w-2xl w-full p-6 sm:p-8 shadow-2xl max-h-[90vh] flex flex-col">
+      <div class="flex items-center justify-between pb-4 border-b border-stone-100">
+        <h3 class="font-serif text-2xl text-stone-900">Panel de Administración de Turnos</h3>
+        <button id="closeAdminBtn" class="text-stone-400 hover:text-stone-700 text-2xl font-light">&times;</button>
+      </div>
+
+      <!-- Pantalla de Login Admin -->
+      <div id="adminLoginView" class="py-10 text-center max-w-xs mx-auto space-y-4">
+        <p class="text-xs text-stone-500">Ingresá la clave de acceso para ver los turnos y datos de los clientes.</p>
+        <input type="password" id="adminPasswordInput" placeholder="Contraseña de administrador" 
+               class="w-full text-sm px-4 py-2.5 rounded-xl border border-stone-300 focus:outline-none focus:border-[#A67C52] text-center">
+        <button id="adminLoginBtn" class="btn-primary w-full py-2.5 rounded-xl text-xs uppercase font-medium tracking-wider">
+          Ingresar
+        </button>
+        <p id="adminLoginError" class="text-xs text-rose-500 hidden font-medium">Contraseña incorrecta</p>
+      </div>
+
+      <!-- Pantalla de Listado de Reservas -->
+      <div id="adminDashboardView" class="hidden flex-1 overflow-y-auto pt-4 space-y-3">
+        <div class="flex items-center justify-between mb-2">
+          <span class="text-xs text-stone-500 font-semibold uppercase">Listado de Turnos Confirmados</span>
+          <button id="refreshAdminBtn" class="text-xs text-[#A67C52] hover:underline font-medium">Actualizar</button>
+        </div>
+        <div id="adminAppointmentsList" class="space-y-2.5">
+          <!-- Renderizado dinámico desde app.js -->
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- FOOTER -->
+  <footer class="bg-stone-900 text-stone-400 py-12 text-sm border-t border-stone-800">
+    <div class="max-w-6xl mx-auto px-4 sm:px-6 flex flex-col sm:flex-row items-center justify-between gap-6">
+      <div>
+        <span class="font-serif text-lg text-stone-100 uppercase tracking-widest font-semibold">Eternal Plasma Derm</span>
+        <p class="text-xs text-stone-500 mt-1">Cuidado estético avanzado, rejuvenecimiento y armonización facial.</p>
+      </div>
+      <div class="flex items-center space-x-6 text-xs">
+        <a href="https://www.instagram.com/eternalplasmaderm" target="_blank" rel="noopener" class="hover:text-stone-100 transition">Instagram Oficial</a>
+        <a href="#turnos" class="hover:text-stone-100 transition">Reservas</a>
+      </div>
+    </div>
+  </footer>
+
+  <!-- Scripts -->
+  <script src="app.js"></script>
+</body>
+</html>

@@ -1,0 +1,86 @@
+/* ============================================================
+   ETERNAL PLASMA DERM - PALETA CLARA Y ESTILO CLÍNICO PREMIUM
+   ============================================================ */
+
+:root {
+  --color-bg-light: #FAF8F5;
+  --color-sand: #EFE9DF;
+  --color-gold: #A67C52;
+  --color-gold-hover: #8F663E;
+  --color-text-main: #2D2A26;
+  --color-text-muted: #6B6661;
+}
+
+body {
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  background-color: var(--color-bg-light);
+  color: var(--color-text-main);
+}
+
+.font-serif {
+  font-family: 'Cormorant Garamond', Georgia, serif;
+}
+
+/* Botones principales con tono champán / arena dorada */
+.btn-primary {
+  background-color: var(--color-gold);
+  color: #FFFFFF;
+  transition: all 0.25s ease-in-out;
+}
+
+.btn-primary:hover {
+  background-color: var(--color-gold-hover);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(166, 124, 82, 0.25);
+}
+
+/* Tarjetas de tratamientos */
+.card {
+  background: #FFFFFF;
+  border: 1px solid rgba(220, 214, 204, 0.6);
+  transition: all 0.3s ease;
+}
+
+.card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 12px 24px -10px rgba(0, 0, 0, 0.06);
+  border-color: rgba(166, 124, 82, 0.3);
+}
+
+/* Estilos de botones de horarios */
+.slot-available {
+  border: 1px solid #D5CEBF;
+  background-color: #FFFFFF;
+  color: #3F3C38;
+  transition: all 0.2s ease;
+}
+
+.slot-available:hover {
+  border-color: var(--color-gold);
+  background-color: #F8F5EE;
+  color: var(--color-gold);
+}
+
+.slot-selected {
+  border-color: var(--color-gold) !important;
+  background-color: var(--color-gold) !important;
+  color: #FFFFFF !important;
+}
+
+.slot-occupied {
+  border: 1px solid #E5E7EB;
+  background-color: #F3F4F6;
+  color: #9CA3AF;
+  cursor: not-allowed;
+  opacity: 0.7;
+}
+
+/* Animación sutil de entrada para modales */
+@keyframes fadeIn {
+  from { opacity: 0; transform: scale(0.98); }
+  to { opacity: 1; transform: scale(1); }
+}
+
+#adminModal > div {
+  animation: fadeIn 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
