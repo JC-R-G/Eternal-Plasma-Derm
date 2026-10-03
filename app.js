@@ -9,7 +9,7 @@ const ADMIN_PASSWORD = "eternaladmin2026";
 // DATOS DE MERCADO PAGO Y CONTACTO
 const MP_ALIAS = "patogil.mp";
 const SENA_VALOR = "$20.000";
-const WHATSAPP_NUMERO = "5492641234567";
+const WHATSAPP_NUMERO = "5492645447043";
 
 // Esquema de horarios según el día
 const HORARIOS_SEMANA = ["16:00", "17:15", "18:30", "19:45"];
