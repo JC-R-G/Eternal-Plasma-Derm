@@ -6,11 +6,11 @@ const SUPABASE_URL = "https://izmumxhupaybploxfbft.supabase.co";
 const SUPABASE_ANON_KEY = "sb_publishable_oavikFmXuEZM5FR0fyMaew_KXnZAivY";
 const ADMIN_PASSWORD = "eternaladmin2026";
 
-// Inicializar cliente Supabase de forma segura
-let supabase = null;
+// Inicializar cliente con un nombre único para evitar colisiones
+let supabaseClient = null;
 try {
   if (window.supabase && typeof window.supabase.createClient === 'function') {
-    supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
   }
 } catch (e) {
   console.error("Error al inicializar Supabase:", e);
@@ -117,9 +117,9 @@ document.addEventListener("DOMContentLoaded", () => {
 
     let occupiedTimes = [];
 
-    if (supabase) {
+    if (supabaseClient) {
       try {
-        const { data, error } = await supabase
+        const { data, error } = await supabaseClient
           .from('appointments')
           .select('appointment_time')
           .eq('appointment_date', dateStr);
@@ -181,8 +181,8 @@ document.addEventListener("DOMContentLoaded", () => {
       submitBtn.textContent = "Confirmando...";
 
       try {
-        if (supabase) {
-          const { error } = await supabase
+        if (supabaseClient) {
+          const { error } = await supabaseClient
             .from('appointments')
             .insert([{
               appointment_date: selectedDateString,
@@ -243,9 +243,9 @@ document.addEventListener("DOMContentLoaded", () => {
 
     let list = [];
 
-    if (supabase) {
+    if (supabaseClient) {
       try {
-        const { data, error } = await supabase
+        const { data, error } = await supabaseClient
           .from('appointments')
           .select('*')
           .order('appointment_date', { ascending: true })
