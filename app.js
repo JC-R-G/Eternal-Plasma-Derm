@@ -3,12 +3,12 @@
    ============================================================ */
 
 const SUPABASE_URL = "https://izmumxhupaybploxfbft.supabase.co";
-const SUPABASE_KEY = "sb_publishable_oavikFmXuEZM5FR0fyMaew_KXnZAivY";
+const SUPABASE_KEY = "sb_publishable_oavikFmXuEZM5FROfyMaew_KXnZAivY";
 const ADMIN_PASSWORD = "eternaladmin2026";
 
 // DATOS DE MERCADO PAGO Y CONTACTO
-const MP_ALIAS = "eternal.plasma.mp";
-const SENA_VALOR = "$5.000";
+const MP_ALIAS = "patogil.mp";
+const SENA_VALOR = "$20.000";
 const WHATSAPP_NUMERO = "5492641234567";
 
 // Esquema de horarios según el día
