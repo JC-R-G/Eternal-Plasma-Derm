@@ -7,9 +7,9 @@ const SUPABASE_ANON_KEY = "sb_publishable_oavikFmXuEZM5FR0fyMaew_KXnZAivY";
 const ADMIN_PASSWORD = "eternaladmin2026";
 
 // DATOS DE MERCADO PAGO Y CONTACTO (Modificá con tus datos reales)
-const MP_ALIAS = "patogil.mp";      // Tu alias de Mercado Pago
-const SENA_VALOR = "$25.000";               // Monto de la seña
-const WHATSAPP_NUMERO = "5492645447043";   // Tu número de WhatsApp sin signos ni espacios
+const MP_ALIAS = "eternal.plasma.mp";      // Tu alias de Mercado Pago
+const SENA_VALOR = "$5.000";               // Monto de la seña
+const WHATSAPP_NUMERO = "5492641234567";   // Tu número de WhatsApp sin signos ni espacios
 
 // Esquema de horarios según el día
 const HORARIOS_SEMANA = ["16:00", "17:15", "18:30", "19:45"];
@@ -118,7 +118,12 @@ document.addEventListener("DOMContentLoaded", () => {
     if (bookingForm) bookingForm.classList.remove("hidden");
     if (bookingSuccessMessage) bookingSuccessMessage.classList.add("hidden");
     if (slotsContainer) {
-      slotsContainer.innerHTML = `<p class="text-xs text-stone-400 col-span-full py-2">Consultando disponibilidad...</p>`;
+      slotsContainer.innerHTML = `<p class="text-xs text-stone-400 col-span-full py-2 text-center">Consultando disponibilidad...</p>`;
+    }
+
+    if (dayOfWeek === undefined) {
+      const parts = dateStr.split('-');
+      dayOfWeek = new Date(parts[0], parts[1] - 1, parts[2]).getDay();
     }
 
     const currentDayHours = (dayOfWeek === 6) ? HORARIOS_SABADO : HORARIOS_SEMANA;
@@ -132,10 +137,12 @@ document.addEventListener("DOMContentLoaded", () => {
           .eq('appointment_date', dateStr);
 
         if (!error && data) {
-          occupiedTimes = data.map(item => item.appointment_time);
+          occupiedTimes = data.map(item => item.appointment_time.trim());
+        } else if (error) {
+          console.error("Error al consultar turnos ocupados:", error);
         }
       } catch (e) {
-        console.warn("Fallo de consulta:", e);
+        console.error("Fallo de conexión al traer turnos:", e);
       }
     }
 
@@ -143,7 +150,7 @@ document.addEventListener("DOMContentLoaded", () => {
     slotsContainer.innerHTML = "";
 
     currentDayHours.forEach(time => {
-      const isOccupied = occupiedTimes.includes(time);
+      const isOccupied = occupiedTimes.includes(time.trim());
       const btn = document.createElement("button");
       btn.type = "button";
       btn.className = "py-2.5 px-3 rounded-xl text-xs font-medium flex items-center justify-center transition";
@@ -263,7 +270,7 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   // ============================================================
-  // PANEL DE ADMINISTRACIÓN MEJORADO (LIBERAR / CONFIRMAR)
+  // PANEL DE ADMINISTRACIÓN (LIBERAR / CONFIRMAR TURNOS)
   // ============================================================
   if (openAdminBtn && adminModal) {
     openAdminBtn.addEventListener("click", () => {
@@ -295,7 +302,6 @@ document.addEventListener("DOMContentLoaded", () => {
     refreshAdminBtn.addEventListener("click", fetchAdminAppointments);
   }
 
-  // Función para obtener y listar turnos en el Panel Admin
   async function fetchAdminAppointments() {
     if (!adminAppointmentsList) return;
     adminAppointmentsList.innerHTML = `<p class="text-xs text-stone-400 py-6 text-center">Cargando reservas desde la base de datos...</p>`;
@@ -413,7 +419,6 @@ document.addEventListener("DOMContentLoaded", () => {
 
             if (error) throw error;
 
-            // Recargar lista admin y refrescar la vista del calendario
             fetchAdminAppointments();
             if (selectedDateString === date) {
               const dateParts = date.split('-');
