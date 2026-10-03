@@ -6,10 +6,10 @@ const SUPABASE_URL = "https://izmumxhupaybploxfbft.supabase.co";
 const SUPABASE_ANON_KEY = "sb_publishable_oavikFmXuEZM5FR0fyMaew_KXnZAivY";
 const ADMIN_PASSWORD = "eternaladmin2026";
 
-// DATOS DE MERCADO PAGO Y CONTACTO (Modificá estos valores)
-const MP_ALIAS = "patogil.mp"; // Tu alias de Mercado Pago
-const SENA_VALOR = "$20.000";          // Monto de la seña
-const WHATSAPP_NUMERO = "5492645447043"; // Número para recibir el comprobante
+// DATOS DE MERCADO PAGO Y CONTACTO (Modificá con tus datos reales)
+const MP_ALIAS = "eternal.plasma.mp";      // Tu alias de Mercado Pago
+const SENA_VALOR = "$5.000";               // Monto de la seña
+const WHATSAPP_NUMERO = "5492641234567";   // Tu número de WhatsApp sin signos ni espacios
 
 // Esquema de horarios según el día
 const HORARIOS_SEMANA = ["16:00", "17:15", "18:30", "19:45"];
@@ -120,9 +120,7 @@ document.addEventListener("DOMContentLoaded", () => {
       slotsContainer.innerHTML = `<p class="text-xs text-stone-400 col-span-full py-2">Consultando disponibilidad...</p>`;
     }
 
-    // Determinar qué lista de horarios corresponde según el día
     const currentDayHours = (dayOfWeek === 6) ? HORARIOS_SABADO : HORARIOS_SEMANA;
-
     let occupiedTimes = [];
 
     if (supabaseClient) {
@@ -175,7 +173,7 @@ document.addEventListener("DOMContentLoaded", () => {
       e.preventDefault();
 
       if (!selectedDateString || !selectedTimeSlot) {
-        alert("Por favor elegí una fecha y un horario disponible.");
+        alert("Por favor seleccioná un horario disponible de la lista.");
         return;
       }
 
@@ -203,7 +201,6 @@ document.addEventListener("DOMContentLoaded", () => {
           if (error) throw error;
         }
 
-        // Mostrar pantalla de confirmación con instrucciones de Mercado Pago
         bookingForm.classList.add("hidden");
         
         const waMsg = encodeURIComponent(`Hola! Acabo de reservar un turno en Eternal Plasma Derm:\n\n👤 Nombre: ${clientName}\n📅 Fecha: ${selectedDateString}\n⏰ Hora: ${selectedTimeSlot} hs\n💆 Tratamiento: ${clientTreatment}\n\nAdjunto aquí el comprobante de la seña (${SENA_VALOR}).`);
@@ -241,7 +238,6 @@ document.addEventListener("DOMContentLoaded", () => {
         `;
         bookingSuccessMessage.classList.remove("hidden");
 
-        // Evento para copiar el alias
         const copyBtn = document.getElementById("copyAliasBtn");
         if (copyBtn) {
           copyBtn.addEventListener("click", () => {
@@ -251,12 +247,12 @@ document.addEventListener("DOMContentLoaded", () => {
           });
         }
 
-        // Actualizar visualmente los horarios del día elegido
-        const dayIdx = new Date(selectedDateString + "T12:00:00").getDay();
-        loadAvailableSlots(selectedDateString, dayIdx);
+        const dateParts = selectedDateString.split('-');
+        const selectedDayOfWeek = new Date(dateParts[0], dateParts[1] - 1, dateParts[2]).getDay();
+        loadAvailableSlots(selectedDateString, selectedDayOfWeek);
 
       } catch (err) {
-        alert("No se pudo procesar la solicitud. Es posible que el horario acabe de ocuparse.");
+        alert("Error de Supabase: " + (err.message || "No se pudo procesar la solicitud"));
         console.error(err);
       } finally {
         submitBtn.disabled = false;
@@ -265,7 +261,7 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 
-  // Panel de Administrador
+  // Panel Admin
   if (openAdminBtn && adminModal) openAdminBtn.addEventListener("click", () => adminModal.classList.remove("hidden"));
   if (closeAdminBtn && adminModal) closeAdminBtn.addEventListener("click", () => adminModal.classList.add("hidden"));
 
