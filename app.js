@@ -3,27 +3,87 @@
    ============================================================ */
 
 const SUPABASE_URL = "https://izmumxhupaybploxfbft.supabase.co";
-const SUPABASE_ANON_KEY = "sb_publishable_oavikFmXuEZM5FR0fyMaew_KXnZAivY";
+const SUPABASE_KEY = "sb_publishable_oavikFmXuEZM5FR0fyMaew_KXnZAivY";
 const ADMIN_PASSWORD = "eternaladmin2026";
 
-// DATOS DE MERCADO PAGO Y CONTACTO (Modificá con tus datos reales)
-const MP_ALIAS = "eternal.plasma.mp";      // Tu alias de Mercado Pago
-const SENA_VALOR = "$5.000";               // Monto de la seña
-const WHATSAPP_NUMERO = "5492641234567";   // Tu número de WhatsApp sin signos ni espacios
+// DATOS DE MERCADO PAGO Y CONTACTO (Ajustá con tus datos si querés)
+const MP_ALIAS = "eternal.plasma.mp";
+const SENA_VALOR = "$5.000";
+const WHATSAPP_NUMERO = "5492641234567";
 
 // Esquema de horarios según el día
 const HORARIOS_SEMANA = ["16:00", "17:15", "18:30", "19:45"];
 const HORARIOS_SABADO = ["09:30", "11:00", "12:30", "15:00", "16:30", "18:00", "19:30"];
 
-// Inicializar cliente Supabase de forma segura
-let supabaseClient = null;
-try {
-  if (window.supabase && typeof window.supabase.createClient === 'function') {
-    supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+// Cliente API directo para máxima compatibilidad con las nuevas Publishable Keys
+const db = {
+  async getBookedTimes(dateStr) {
+    const res = await fetch(`${SUPABASE_URL}/rest/v1/appointments?appointment_date=eq.${dateStr}&select=appointment_time`, {
+      method: "GET",
+      headers: {
+        "apikey": SUPABASE_KEY,
+        "Authorization": `Bearer ${SUPABASE_KEY}`
+      }
+    });
+    if (!res.ok) throw new Error(await res.text());
+    const data = await res.json();
+    return data.map(item => String(item.appointment_time).trim());
+  },
+
+  async insertAppointment(payload) {
+    const res = await fetch(`${SUPABASE_URL}/rest/v1/appointments`, {
+      method: "POST",
+      headers: {
+        "apikey": SUPABASE_KEY,
+        "Authorization": `Bearer ${SUPABASE_KEY}`,
+        "Content-Type": "application/json",
+        "Prefer": "return=representation"
+      },
+      body: JSON.stringify(payload)
+    });
+    if (!res.ok) {
+      const err = await res.text();
+      throw new Error(err);
+    }
+    return await res.json();
+  },
+
+  async getAllAppointments() {
+    const res = await fetch(`${SUPABASE_URL}/rest/v1/appointments?select=*&order=appointment_date.asc,appointment_time.asc`, {
+      method: "GET",
+      headers: {
+        "apikey": SUPABASE_KEY,
+        "Authorization": `Bearer ${SUPABASE_KEY}`
+      }
+    });
+    if (!res.ok) throw new Error(await res.text());
+    return await res.json();
+  },
+
+  async updateStatus(id, newStatus) {
+    const res = await fetch(`${SUPABASE_URL}/rest/v1/appointments?id=eq.${id}`, {
+      method: "PATCH",
+      headers: {
+        "apikey": SUPABASE_KEY,
+        "Authorization": `Bearer ${SUPABASE_KEY}`,
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({ status: newStatus })
+    });
+    if (!res.ok) throw new Error(await res.text());
+  },
+
+  async deleteAppointment(id) {
+    const res = await fetch(`${SUPABASE_URL}/rest/v1/appointments?id=eq.${id}`, {
+      method: "DELETE",
+      headers: {
+        "apikey": SUPABASE_KEY,
+        "Authorization": `Bearer ${SUPABASE_KEY}`
+      }
+    });
+    if (!res.ok) throw new Error(await res.text());
   }
-} catch (e) {
-  console.error("Error al inicializar Supabase:", e);
-}
+};
 
 let currentDate = new Date();
 let selectedDateString = null;
@@ -129,21 +189,10 @@ document.addEventListener("DOMContentLoaded", () => {
     const currentDayHours = (dayOfWeek === 6) ? HORARIOS_SABADO : HORARIOS_SEMANA;
     let occupiedTimes = [];
 
-    if (supabaseClient) {
-      try {
-        const { data, error } = await supabaseClient
-          .from('appointments')
-          .select('appointment_time')
-          .eq('appointment_date', dateStr);
-
-        if (!error && data) {
-          occupiedTimes = data.map(item => item.appointment_time.trim());
-        } else if (error) {
-          console.error("Error al consultar turnos ocupados:", error);
-        }
-      } catch (e) {
-        console.error("Fallo de conexión al traer turnos:", e);
-      }
+    try {
+      occupiedTimes = await db.getBookedTimes(dateStr);
+    } catch (e) {
+      console.warn("Aviso al consultar turnos ocupados:", e);
     }
 
     if (!slotsContainer) return;
@@ -194,20 +243,14 @@ document.addEventListener("DOMContentLoaded", () => {
       submitBtn.textContent = "Guardando turno...";
 
       try {
-        if (supabaseClient) {
-          const { error } = await supabaseClient
-            .from('appointments')
-            .insert([{
-              appointment_date: selectedDateString,
-              appointment_time: selectedTimeSlot,
-              client_name: clientName,
-              client_phone: clientPhone,
-              treatment: clientTreatment,
-              status: 'pendiente_sena'
-            }]);
-
-          if (error) throw error;
-        }
+        await db.insertAppointment({
+          appointment_date: selectedDateString,
+          appointment_time: selectedTimeSlot,
+          client_name: clientName,
+          client_phone: clientPhone,
+          treatment: clientTreatment,
+          status: 'pendiente_sena'
+        });
 
         bookingForm.classList.add("hidden");
         
@@ -260,7 +303,7 @@ document.addEventListener("DOMContentLoaded", () => {
         loadAvailableSlots(selectedDateString, selectedDayOfWeek);
 
       } catch (err) {
-        alert("Error de Supabase: " + (err.message || "No se pudo procesar la solicitud"));
+        alert("No se pudo procesar la solicitud: " + err.message);
         console.error(err);
       } finally {
         submitBtn.disabled = false;
@@ -307,18 +350,10 @@ document.addEventListener("DOMContentLoaded", () => {
     adminAppointmentsList.innerHTML = `<p class="text-xs text-stone-400 py-6 text-center">Cargando reservas desde la base de datos...</p>`;
 
     let list = [];
-    if (supabaseClient) {
-      try {
-        const { data, error } = await supabaseClient
-          .from('appointments')
-          .select('*')
-          .order('appointment_date', { ascending: true })
-          .order('appointment_time', { ascending: true });
-
-        if (!error && data) list = data;
-      } catch (e) {
-        console.error(e);
-      }
+    try {
+      list = await db.getAllAppointments();
+    } catch (e) {
+      console.error(e);
     }
 
     if (list.length === 0) {
@@ -380,12 +415,7 @@ document.addEventListener("DOMContentLoaded", () => {
           confirmBtn.textContent = 'Actualizando...';
 
           try {
-            const { error } = await supabaseClient
-              .from('appointments')
-              .update({ status: 'confirmed' })
-              .eq('id', appointmentId);
-
-            if (error) throw error;
+            await db.updateStatus(appointmentId, 'confirmed');
             fetchAdminAppointments();
           } catch (err) {
             alert('Error al confirmar: ' + err.message);
@@ -405,21 +435,15 @@ document.addEventListener("DOMContentLoaded", () => {
           const clientName = deleteBtn.getAttribute('data-name');
 
           const seguro = confirm(`¿Estás seguro de que querés liberar el turno de las ${time} hs (${date}) reservado por "${clientName}"?\n\nEl horario volverá a figurar disponible para todo el público.`);
-          
           if (!seguro) return;
 
           deleteBtn.disabled = true;
           deleteBtn.textContent = 'Liberando...';
 
           try {
-            const { error } = await supabaseClient
-              .from('appointments')
-              .delete()
-              .eq('id', appointmentId);
-
-            if (error) throw error;
-
+            await db.deleteAppointment(appointmentId);
             fetchAdminAppointments();
+
             if (selectedDateString === date) {
               const dateParts = date.split('-');
               const dayIdx = new Date(dateParts[0], dateParts[1] - 1, dateParts[2]).getDay();
