@@ -3,24 +3,40 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Eternal Plasma Derm | Estética Avanzada y Plasma Pen</title>
-  <meta name="description" content="Tratamientos faciales no invasivos con Plasma Pen y rejuvenecimiento en Eternal Plasma Derm.">
+  <title>Eternal Plasma Derm | Estética Avanzada y Plasma Rico en Plaquetas</title>
+  <meta name="description" content="Tratamientos médicos-estéticos de Plasma Rico en Plaquetas (PRP) con Dermapen en Eternal Plasma Derm.">
   
   <!-- Tipografía Google Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;600;700&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   
-  <!-- Tailwind CSS CDN para maquetación rápida -->
+  <!-- Tailwind CSS CDN -->
   <script src="https://cdn.tailwindcss.com"></script>
-  
-  <!-- Supabase JS Client -->
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.48.1/dist/umd/supabase.min.js"></script>
   
   <!-- Estilos propios personalizados -->
   <link rel="stylesheet" href="styles.css">
 </head>
 <body class="bg-[#FAF8F5] text-stone-800 antialiased min-h-screen flex flex-col justify-between">
+
+  <!-- BARRA DE ADMINISTRADOR ACTIVO (Flotante y visible solo al iniciar sesión) -->
+  <div id="adminTopBar" class="hidden sticky top-0 z-50 bg-stone-900 text-amber-200 border-b border-amber-600/40 px-4 py-2.5 text-xs">
+    <div class="max-w-7xl mx-auto flex items-center justify-between gap-4">
+      <div class="flex items-center gap-2">
+        <span class="inline-block w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse"></span>
+        <span class="font-bold tracking-wider uppercase text-[11px] text-white">Sesión Profesional Activa</span>
+        <span class="hidden sm:inline text-stone-400">| Panel de Control y Bloqueo Habilitado</span>
+      </div>
+      <div class="flex items-center gap-3">
+        <button id="openAdminDashboardBtn" class="px-3 py-1 rounded-lg bg-[#A67C52] text-white font-medium hover:bg-[#8F663E] transition">
+          Gestionar Turnos
+        </button>
+        <button id="adminLogoutBtn" class="px-3 py-1 rounded-lg bg-stone-800 text-stone-300 hover:text-white hover:bg-stone-700 transition">
+          Cerrar Sesión
+        </button>
+      </div>
+    </div>
+  </div>
 
   <!-- NAVBAR -->
   <header class="sticky top-0 z-40 bg-[#FAF8F5]/90 backdrop-blur-md border-b border-stone-200/70 transition-all">
@@ -32,45 +48,126 @@
 
       <!-- Menú Escritorio -->
       <nav class="hidden md:flex items-center space-x-8 text-sm font-medium text-stone-600">
-        <a href="#inicio" class="hover:text-[#A67C52] transition">Inicio</a>
+        <a href="#inicio" class="hover:text-[#A67C52] transition">¿Qué es el PRP?</a>
         <a href="#servicios" class="hover:text-[#A67C52] transition">Tratamientos</a>
-        <a href="#galeria" class="hover:text-[#A67C52] transition">Antes & Después</a>
+        <a href="#clinicas" class="hover:text-[#A67C52] transition">Clínicas</a>
         <a href="#turnos" class="hover:text-[#A67C52] transition font-semibold text-[#A67C52]">Turnos</a>
-        <a href="#contacto" class="hover:text-[#A67C52] transition">Contacto</a>
+        <a href="#contacto" class="hover:text-[#A67C52] transition">Sobre Mí & Contacto</a>
       </nav>
 
       <div class="flex items-center space-x-3">
         <a href="#turnos" class="btn-primary text-xs uppercase tracking-wider px-5 py-2.5 rounded-full font-semibold">
           Reservar Turno
         </a>
-        <button id="openAdminBtn" title="Acceso Profesional / Admin" class="p-2 text-stone-400 hover:text-stone-700 transition">
-          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/></svg>
+        <button id="openAdminBtn" title="Acceso Profesional / Admin" class="p-2 text-stone-400 hover:text-stone-700 transition relative">
+          <!-- Ícono Candado (por defecto) -->
+          <svg id="lockIconDefault" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/></svg>
+          <!-- Ícono Conectado (cuando el admin está logueado) -->
+          <svg id="lockIconLogged" class="w-5 h-5 text-emerald-600 hidden" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M2.166 4.999A11.954 11.954 0 0010 1.944 11.954 11.954 0 0017.834 5c.11.65.166 1.32.166 2.001 0 5.225-3.34 9.67-8 11.317C5.34 16.67 2 12.225 2 7c0-.682.057-1.35.166-2.001zm11.541 3.708a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/></svg>
         </button>
       </div>
     </div>
   </header>
 
-  <!-- HERO SECTION -->
-  <section id="inicio" class="relative pt-12 pb-20 md:py-28 overflow-hidden bg-gradient-to-b from-stone-100/60 to-[#FAF8F5]">
-    <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 text-center relative z-10">
-      <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#EFE9DF] text-[#7A5B3E] text-xs font-medium uppercase tracking-widest mb-6">
-        <span>✨ Dermoestética y Rejuvenecimiento No Invasivo</span>
+  <!-- SECCIÓN PRP (HERO + GUÍA CLÍNICA ANTES Y DESPUÉS) -->
+  <section id="inicio" class="relative pt-12 pb-20 md:py-24 overflow-hidden bg-gradient-to-b from-stone-100/60 to-[#FAF8F5]">
+    <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+      
+      <div class="text-center max-w-3xl mx-auto mb-14">
+        <div class="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-[#EFE9DF] text-[#7A5B3E] text-xs font-semibold uppercase tracking-widest mb-6">
+          <span>🩸 Bioestimulación Celular & Microneedling</span>
+        </div>
+        <h1 class="font-serif text-4xl sm:text-5xl lg:text-6xl font-light text-stone-900 leading-tight mb-5">
+          Plasma Rico en Plaquetas <br class="hidden sm:inline" />
+          <span class="italic font-normal text-[#A67C52]">(PRP) con Dermapen</span>
+        </h1>
+        <p class="text-stone-600 text-sm sm:text-base leading-relaxed font-light">
+          Bioestimulación autóloga mediante centrifugado de la propia sangre, rica en factores de crecimiento para regenerar colágeno y elastina, realizada de manera controlada y uniforme con tecnología Dermapen.
+        </p>
       </div>
-      <h1 class="font-serif text-4xl sm:text-6xl lg:text-7xl font-light text-stone-900 leading-tight mb-6">
-        Precisión clínica, <br class="hidden sm:inline" />
-        <span class="italic font-normal text-[#A67C52]">resultados naturales</span>
-      </h1>
-      <p class="max-w-2xl mx-auto text-stone-600 text-base sm:text-lg mb-10 font-light leading-relaxed">
-        Tecnología Plasma Pen para tensado cutáneo, blefaroplastia sin cirugía y regeneración celular profunda. Tu piel en manos expertas.
-      </p>
+
+      <div class="bg-white rounded-3xl p-6 sm:p-8 border border-stone-200 shadow-sm mb-10 flex flex-col md:flex-row items-center gap-8">
+        <div class="w-16 h-16 sm:w-20 sm:h-20 rounded-2xl bg-[#F5EFE6] text-[#A67C52] flex items-center justify-center font-bold text-3xl shrink-0">
+          🧪
+        </div>
+        <div class="space-y-2 text-center md:text-left">
+          <h2 class="font-serif text-2xl text-stone-900 font-semibold">¿Qué es el tratamiento de PRP con Dermapen?</h2>
+          <p class="text-xs sm:text-sm text-stone-600 leading-relaxed font-light">
+            Es un tratamiento de <strong>bioestimulación autóloga</strong> obtenido a través del centrifugado de una muestra de tu propia sangre, lo que permite concentrar una alta fracción de plaquetas y factores de crecimiento biológicamente activos. La aplicación se realiza mediante <strong>Dermapen</strong>, un dispositivo de microagujas estériles que genera microcanales precisos en la dermis, asegurando la máxima penetración del plasma, induciendo la regeneración profunda de colágeno, elastina y devolviendo firmeza sin alterar las facciones naturales.
+          </p>
+        </div>
+      </div>
+
+      <!-- Columnas: Cuidados ANTES y DESPUÉS -->
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-8 mb-12">
+        
+        <div class="card p-6 sm:p-8 rounded-3xl flex flex-col justify-between border border-amber-200/80 bg-white">
+          <div>
+            <div class="flex items-center gap-3 mb-5">
+              <span class="w-8 h-8 rounded-full bg-amber-100 text-amber-800 flex items-center justify-center font-bold text-xs">01</span>
+              <h3 class="font-serif text-2xl text-stone-900">Cuidados Pre-Tratamiento (Antes)</h3>
+            </div>
+            <ul class="space-y-3.5 text-xs text-stone-600 leading-relaxed">
+              <li class="flex items-start gap-2.5">
+                <span class="text-[#A67C52] font-bold text-sm shrink-0">💧</span>
+                <span><strong>Hidratación previa de 48 hs:</strong> Ingerir abundante agua durante los dos días anteriores a la sesión para favorecer la extracción sanguínea y la hidratación tisular.</span>
+              </li>
+              <li class="flex items-start gap-2.5">
+                <span class="text-[#A67C52] font-bold text-sm shrink-0">🚫</span>
+                <span><strong>Evitar antiinflamatorios:</strong> No tomar aspirina, ibuprofeno ni medicamentos antiinflamatorios (AINEs) 48 hs antes, ya que interfieren directamente con la función y activación plaquetaria.</span>
+              </li>
+              <li class="flex items-start gap-2.5">
+                <span class="text-[#A67C52] font-bold text-sm shrink-0">🧼</span>
+                <span><strong>Piel completamente limpia:</strong> Presentarse a la cita con el rostro o la zona a tratar higienizada, sin maquillaje, polvos, bases ni cremas cosméticas.</span>
+              </li>
+              <li class="flex items-start gap-2.5">
+                <span class="text-[#A67C52] font-bold text-sm shrink-0">🍎</span>
+                <span><strong>Cuidados Alimenticios:</strong> Mínimo 3 horas antes evitar azúcares en exceso y comidas altas en grasas, para evitar un plasma lipémico (turbio).</span>
+              </li>
+            </ul>
+          </div>
+          <span class="text-[11px] font-semibold text-[#A67C52] uppercase tracking-wider mt-6 pt-4 border-t border-stone-100">
+            ✦ Preparación clínica indispensable
+          </span>
+        </div>
+
+        <div class="card p-6 sm:p-8 rounded-3xl flex flex-col justify-between border border-emerald-200/80 bg-white">
+          <div>
+            <div class="flex items-center gap-3 mb-5">
+              <span class="w-8 h-8 rounded-full bg-emerald-100 text-emerald-800 flex items-center justify-center font-bold text-xs">02</span>
+              <h3 class="font-serif text-2xl text-stone-900">Cuidados Post-Tratamiento (Después)</h3>
+            </div>
+            <ul class="space-y-3.5 text-xs text-stone-600 leading-relaxed">
+              <li class="flex items-start gap-2.5">
+                <span class="text-emerald-600 font-bold text-sm shrink-0">⏳</span>
+                <span><strong>No lavar la zona por 12 a 24 horas:</strong> Dejar actuar el plasma absorbido y permitir el sellado natural de los microcanales del Dermapen.</span>
+              </li>
+              <li class="flex items-start gap-2.5">
+                <span class="text-emerald-600 font-bold text-sm shrink-0">☀️</span>
+                <span><strong>Uso estricto de protector solar FPS 50+:</strong> Proteger la zona rigurosamente. No exponerse al sol directo durante las 48 a 72 horas posteriores a la sesión.</span>
+              </li>
+              <li class="flex items-start gap-2.5">
+                <span class="text-emerald-600 font-bold text-sm shrink-0">🚫</span>
+                <span><strong>Sin calor ni esfuerzo físico:</strong> Evitar actividad física intensa, saunas, baños con vapor o agua caliente durante las primeras 24 a 48 horas.</span>
+              </li>
+            </ul>
+          </div>
+          <span class="text-[11px] font-semibold text-emerald-700 uppercase tracking-wider mt-6 pt-4 border-t border-stone-100">
+            ✦ Para fijar y potenciar los resultados
+          </span>
+        </div>
+
+      </div>
+
       <div class="flex flex-col sm:flex-row items-center justify-center gap-4">
-        <a href="#turnos" class="btn-primary w-full sm:w-auto px-8 py-3.5 rounded-full font-medium text-sm tracking-wider uppercase shadow-sm">
-          Agendar Cita Online
+        <a href="#turnos" class="btn-primary w-full sm:w-auto px-8 py-3.5 rounded-full font-medium text-sm tracking-wider uppercase shadow-sm text-center">
+          Agendar Sesión de PRP Online
         </a>
-        <a href="#servicios" class="w-full sm:w-auto px-8 py-3.5 rounded-full border border-stone-300 text-stone-700 text-sm font-medium hover:bg-stone-50 transition">
-          Ver Tratamientos
+        <a href="#clinicas" class="w-full sm:w-auto px-8 py-3.5 rounded-full border border-stone-300 text-stone-700 text-sm font-medium hover:bg-stone-50 transition text-center">
+          Ver Clínicas Disponibles
         </a>
       </div>
+
     </div>
   </section>
 
@@ -79,78 +176,297 @@
     <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
       <div class="text-center max-w-xl mx-auto mb-16">
         <span class="text-xs uppercase tracking-[0.25em] text-[#A67C52] font-semibold">Especialidades</span>
-        <h2 class="font-serif text-3xl sm:text-4xl text-stone-900 mt-2">Nuestros Tratamientos</h2>
+        <h2 class="font-serif text-3xl sm:text-4xl text-stone-900 mt-2">Áreas de Aplicación con Dermapen</h2>
         <div class="h-0.5 w-12 bg-[#A67C52] mx-auto mt-4"></div>
       </div>
 
       <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
-        <!-- Tarjeta 1 -->
         <div class="card p-8 rounded-2xl flex flex-col justify-between">
           <div>
             <div class="w-12 h-12 rounded-xl bg-[#F5EFE6] flex items-center justify-center text-[#A67C52] mb-6">
               <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.6" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.6" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
             </div>
-            <h3 class="font-serif text-2xl text-stone-900 mb-2">Blefaroplastia No Quirúrgica</h3>
+            <h3 class="font-serif text-2xl text-stone-900 mb-2">PRP Facial & Cuello y Escote</h3>
             <p class="text-sm text-stone-600 leading-relaxed mb-6 font-light">
-              Elevación de párpados caídos y reducción de bolsas perioculares sin cortes ni quirófano.
+              Revitalización profunda, reducción de líneas de expresión, tensado natural y luminosidad cutánea sin alterar la expresión.
             </p>
           </div>
           <span class="text-xs font-semibold uppercase tracking-wider text-[#A67C52]">Sesión ~ 60 min</span>
         </div>
 
-        <!-- Tarjeta 2 -->
         <div class="card p-8 rounded-2xl flex flex-col justify-between">
           <div>
             <div class="w-12 h-12 rounded-xl bg-[#F5EFE6] flex items-center justify-center text-[#A67C52] mb-6">
               <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.6" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
             </div>
-            <h3 class="font-serif text-2xl text-stone-900 mb-2">Lifting Plasma Pen</h3>
+            <h3 class="font-serif text-2xl text-stone-900 mb-2">PRP Capilar</h3>
             <p class="text-sm text-stone-600 leading-relaxed mb-6 font-light">
-              Estimulación de colágeno para atenuar líneas de expresión, surcos nasogenianos y flacidez cutánea.
+              Estimulación folicular directa en cuero cabelludo para frenar la caída del cabello, fortalecer raíces debilitadas y promover nuevo crecimiento.
             </p>
           </div>
-          <span class="text-xs font-semibold uppercase tracking-wider text-[#A67C52]">Sesión ~ 90 min</span>
+          <span class="text-xs font-semibold uppercase tracking-wider text-[#A67C52]">Sesión ~ 60 min</span>
         </div>
 
-        <!-- Tarjeta 3 -->
         <div class="card p-8 rounded-2xl flex flex-col justify-between">
           <div>
             <div class="w-12 h-12 rounded-xl bg-[#F5EFE6] flex items-center justify-center text-[#A67C52] mb-6">
               <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.6" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z"/></svg>
             </div>
-            <h3 class="font-serif text-2xl text-stone-900 mb-2">Eliminación de Lesiones y Manchas</h3>
+            <h3 class="font-serif text-2xl text-stone-900 mb-2">PRP Corporal</h3>
             <p class="text-sm text-stone-600 leading-relaxed mb-6 font-light">
-              Remoción controlada y precisa de puntos rubí, léntigos solares, verrugas benignas y marcas de acné.
+              Regeneración dérmica localizada para tratamiento de estrías, cicatrices post-quirúrgicas, flacidez en manos y escote.
             </p>
           </div>
-          <span class="text-xs font-semibold uppercase tracking-wider text-[#A67C52]">Sesión ~ 45 min</span>
+          <span class="text-xs font-semibold uppercase tracking-wider text-[#A67C52]">Sesión ~ 60 min</span>
         </div>
       </div>
     </div>
   </section>
 
+  <!-- SECCIÓN CLÍNICAS Y SEDES (CON DÍAS Y HORARIOS ESPECIFICADOS) -->
+  <section id="clinicas" class="py-20 bg-[#FAF8F5] border-t border-stone-200/70">
+    <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="text-center max-w-xl mx-auto mb-16">
+        <span class="text-xs uppercase tracking-[0.25em] text-[#A67C52] font-semibold">Puntos de Atención & Días Habilitados</span>
+        <h2 class="font-serif text-3xl sm:text-4xl text-stone-900 mt-2">Nuestras Clínicas</h2>
+        <p class="text-sm text-stone-600 mt-3 font-light">
+          Para garantizar una atención personalizada, cada consultorio atiende en días específicos del mes con turnos programados.
+        </p>
+        <div class="h-0.5 w-12 bg-[#A67C52] mx-auto mt-4"></div>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+        
+        <!-- Sede 1: Jáchal -->
+        <div class="card rounded-3xl overflow-hidden flex flex-col justify-between shadow-sm">
+          <div>
+            <div class="h-48 w-full overflow-hidden bg-stone-100 relative">
+              <img src="clinica-jachal.jpg" alt="Clínica Eli Pa Ce - Jáchal" 
+                   onerror="this.onerror=null; this.src='https://images.unsplash.com/photo-1629909613654-28e377c37b09?auto=format&fit=crop&w=800&q=80';" 
+                   class="w-full h-full object-cover transition duration-300 hover:scale-105">
+              <span class="absolute top-3 left-3 px-3 py-1 rounded-full bg-white/90 backdrop-blur text-[11px] font-bold text-[#A67C52] uppercase tracking-wider shadow-sm">
+                Jáchal
+              </span>
+            </div>
+            <div class="p-6">
+              <!-- Insignia destacada de días -->
+              <div class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-amber-50 border border-amber-200 text-amber-900 text-[11px] font-bold uppercase tracking-wider mb-3">
+                <span>📅 2º Jueves de cada mes</span>
+              </div>
+              <h3 class="font-serif text-2xl text-stone-900 mb-1">Clínica Eli Pa Ce</h3>
+              <p class="text-xs text-stone-500 mb-4 flex items-center gap-1.5">
+                <svg class="w-4 h-4 text-[#A67C52]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+                Jáchal, San Juan
+              </p>
+              <p class="text-xs text-stone-600 leading-relaxed font-light">
+                Atención exclusiva una vez al mes para regeneración cutánea, centrifugado estéril y bioestimulación con Dermapen.
+              </p>
+            </div>
+          </div>
+          <div class="p-6 pt-0">
+            <a href="https://maps.google.com/?q=Clinica+Eli+Pa+Ce+Jachal+San+Juan" target="_blank" rel="noopener" 
+               class="w-full py-2.5 px-4 rounded-xl border border-stone-300 hover:border-[#A67C52] text-stone-700 hover:text-[#A67C52] text-xs font-semibold flex items-center justify-center gap-2 transition bg-white">
+              <span>📍 Ver en Google Maps</span>
+            </a>
+          </div>
+        </div>
+
+        <!-- Sede 2: Rodeo -->
+        <div class="card rounded-3xl overflow-hidden flex flex-col justify-between shadow-sm">
+          <div>
+            <div class="h-48 w-full overflow-hidden bg-stone-100 relative">
+              <img src="clinica-iglesia.jpg" alt="Clínica Santo Domingo - Rodeo" 
+                   onerror="this.onerror=null; this.src='https://images.unsplash.com/photo-1519494026892-80bbd2d6fd0d?auto=format&fit=crop&w=800&q=80';" 
+                   class="w-full h-full object-cover transition duration-300 hover:scale-105">
+              <span class="absolute top-3 left-3 px-3 py-1 rounded-full bg-white/90 backdrop-blur text-[11px] font-bold text-[#A67C52] uppercase tracking-wider shadow-sm">
+                Rodeo
+              </span>
+            </div>
+            <div class="p-6">
+              <!-- Insignia destacada de días -->
+              <div class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-amber-50 border border-amber-200 text-amber-900 text-[11px] font-bold uppercase tracking-wider mb-3">
+                <span>📅 2º Viernes de cada mes</span>
+              </div>
+              <h3 class="font-serif text-2xl text-stone-900 mb-1">Clínica Santo Domingo</h3>
+              <p class="text-xs text-stone-500 mb-4 flex items-center gap-1.5">
+                <svg class="w-4 h-4 text-[#A67C52]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+                Rodeo, Iglesia, San Juan
+              </p>
+              <p class="text-xs text-stone-600 leading-relaxed font-light">
+                Consultorio clínico disponible el segundo viernes mensual con agenda programada y personalizada.
+              </p>
+            </div>
+          </div>
+          <div class="p-6 pt-0">
+            <a href="https://maps.google.com/?q=Clinica+Santo+Domingo+Rodeo+Iglesia+San+Juan" target="_blank" rel="noopener" 
+               class="w-full py-2.5 px-4 rounded-xl border border-stone-300 hover:border-[#A67C52] text-stone-700 hover:text-[#A67C52] text-xs font-semibold flex items-center justify-center gap-2 transition bg-white">
+              <span>📍 Ver en Google Maps</span>
+            </a>
+          </div>
+        </div>
+
+        <!-- Sede 3: Pocito -->
+        <div class="card rounded-3xl overflow-hidden flex flex-col justify-between shadow-sm">
+          <div>
+            <div class="h-48 w-full overflow-hidden bg-stone-100 relative">
+              <img src="clinica-pocito.jpg" alt="Instituto de la Salud - Pocito" 
+                   onerror="this.onerror=null; this.src='https://images.unsplash.com/photo-1586773860418-d37222d8fce3?auto=format&fit=crop&w=800&q=80';" 
+                   class="w-full h-full object-cover transition duration-300 hover:scale-105">
+              <span class="absolute top-3 left-3 px-3 py-1 rounded-full bg-white/90 backdrop-blur text-[11px] font-bold text-[#A67C52] uppercase tracking-wider shadow-sm">
+                Pocito
+              </span>
+            </div>
+            <div class="p-6">
+              <!-- Insignia destacada de días -->
+              <div class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#EFE9DF] text-[#7A5B3E] text-[11px] font-bold uppercase tracking-wider mb-3">
+                <span>📅 Miércoles únicamente</span>
+              </div>
+              <h3 class="font-serif text-2xl text-stone-900 mb-1">Instituto de la Salud</h3>
+              <p class="text-xs text-stone-500 mb-4 flex items-center gap-1.5">
+                <svg class="w-4 h-4 text-[#A67C52]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+                Pocito, San Juan
+              </p>
+              <p class="text-xs text-stone-600 leading-relaxed font-light">
+                Consultorio de alta privacidad, con tecnología de vanguardia y ambiente confortable para tu tratamiento todos los miércoles.
+              </p>
+            </div>
+          </div>
+          <div class="p-6 pt-0">
+            <a href="https://maps.google.com/?q=Instituto+de+la+Salud+Pocito+San+Juan" target="_blank" rel="noopener" 
+               class="w-full py-2.5 px-4 rounded-xl border border-stone-300 hover:border-[#A67C52] text-stone-700 hover:text-[#A67C52] text-xs font-semibold flex items-center justify-center gap-2 transition bg-white">
+              <span>📍 Ver en Google Maps</span>
+            </a>
+          </div>
+        </div>
+
+        <!-- Sede 4: Valle Fértil -->
+        <div class="card rounded-3xl overflow-hidden flex flex-col justify-between shadow-sm">
+          <div>
+            <div class="h-48 w-full overflow-hidden bg-stone-100 relative">
+              <img src="clinica-vallefertil.jpg" alt="S.I.M.A - Valle Fértil" 
+                   onerror="this.onerror=null; this.src='https://images.unsplash.com/photo-1516549655169-df83a0774514?auto=format&fit=crop&w=800&q=80';" 
+                   class="w-full h-full object-cover transition duration-300 hover:scale-105">
+              <span class="absolute top-3 left-3 px-3 py-1 rounded-full bg-white/90 backdrop-blur text-[11px] font-bold text-[#A67C52] uppercase tracking-wider shadow-sm">
+                Valle Fértil
+              </span>
+            </div>
+            <div class="p-6">
+              <!-- Insignia destacada de días -->
+              <div class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#EFE9DF] text-[#7A5B3E] text-[11px] font-bold uppercase tracking-wider mb-3">
+                <span>📅 1º Viernes del mes & Todos los Sábados</span>
+              </div>
+              <h3 class="font-serif text-2xl text-stone-900 mb-1">S.I.M.A</h3>
+              <p class="text-xs text-stone-500 mb-4 flex items-center gap-1.5">
+                <svg class="w-4 h-4 text-[#A67C52]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+                San Agustín del Valle Fértil, San Juan
+              </p>
+              <p class="text-xs text-stone-600 leading-relaxed font-light">
+                Atención médica programada en consultorios de S.I.M.A para tratamientos dérmicos, capilares y faciales.
+              </p>
+            </div>
+          </div>
+          <div class="p-6 pt-0">
+            <a href="https://maps.google.com/?q=SIMA+Valle+Fertil+San+Juan" target="_blank" rel="noopener" 
+               class="w-full py-2.5 px-4 rounded-xl border border-stone-300 hover:border-[#A67C52] text-stone-700 hover:text-[#A67C52] text-xs font-semibold flex items-center justify-center gap-2 transition bg-white">
+              <span>📍 Ver en Google Maps</span>
+            </a>
+          </div>
+        </div>
+
+        <!-- Sede 5: Calingasta -->
+        <div class="card rounded-3xl overflow-hidden flex flex-col justify-between shadow-sm">
+          <div>
+            <div class="h-48 w-full overflow-hidden bg-stone-100 relative">
+              <img src="clinica-calingasta.jpg" alt="CEKYM - Calingasta" 
+                   onerror="this.onerror=null; this.src='https://images.unsplash.com/photo-1504813184591-01572f98c85f?auto=format&fit=crop&w=800&q=80';" 
+                   class="w-full h-full object-cover transition duration-300 hover:scale-105">
+              <span class="absolute top-3 left-3 px-3 py-1 rounded-full bg-white/90 backdrop-blur text-[11px] font-bold text-[#A67C52] uppercase tracking-wider shadow-sm">
+                Calingasta (Proximamente)
+              </span>
+            </div>
+            <div class="p-6">
+              <!-- Insignia destacada de días -->
+              <div class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-stone-100 border border-stone-200 text-stone-700 text-[11px] font-bold uppercase tracking-wider mb-3">
+                <span>📅 Fechas especiales a coordinar</span>
+              </div>
+              <h3 class="font-serif text-2xl text-stone-900 mb-1">CEKYM</h3>
+              <p class="text-xs text-stone-500 mb-4 flex items-center gap-1.5">
+                <svg class="w-4 h-4 text-[#A67C52]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+                Calingasta / Barreal, San Juan
+              </p>
+              <p class="text-xs text-stone-600 leading-relaxed font-light">
+                Consultorio clínico enfocado en bioestimulación, tratamientos faciales y protocolos con Dermapen según cronograma periódico.
+              </p>
+            </div>
+          </div>
+          <div class="p-6 pt-0">
+            <a href="https://maps.google.com/?q=CEKYM+Calingasta+San+Juan" target="_blank" rel="noopener" 
+               class="w-full py-2.5 px-4 rounded-xl border border-stone-300 hover:border-[#A67C52] text-stone-700 hover:text-[#A67C52] text-xs font-semibold flex items-center justify-center gap-2 transition bg-white">
+              <span>📍 Ver en Google Maps</span>
+            </a>
+          </div>
+        </div>
+
+        <!-- Sede 6: Capital -->
+        <div class="card rounded-3xl overflow-hidden flex flex-col justify-between shadow-sm">
+          <div>
+            <div class="h-48 w-full overflow-hidden bg-stone-100 relative">
+              <img src="clinica-capital.jpg" alt="Clínica RENACER - Capital" 
+                   onerror="this.onerror=null; this.src='https://images.unsplash.com/photo-1629909615184-74f495363b67?auto=format&fit=crop&w=800&q=80';" 
+                   class="w-full h-full object-cover transition duration-300 hover:scale-105">
+              <span class="absolute top-3 left-3 px-3 py-1 rounded-full bg-white/90 backdrop-blur text-[11px] font-bold text-[#A67C52] uppercase tracking-wider shadow-sm">
+                Capital
+              </span>
+            </div>
+            <div class="p-6">
+              <!-- Insignia destacada de días -->
+              <div class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#EFE9DF] text-[#7A5B3E] text-[11px] font-bold uppercase tracking-wider mb-3">
+                <span>📅 Lunes únicamente</span>
+              </div>
+              <h3 class="font-serif text-2xl text-stone-900 mb-1">Clínica RENACER</h3>
+              <p class="text-xs text-stone-500 mb-4 flex items-center gap-1.5">
+                <svg class="w-4 h-4 text-[#A67C52]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+                San Juan Capital, San Juan
+              </p>
+              <p class="text-xs text-stone-600 leading-relaxed font-light">
+                Instalaciones de primer nivel en el microcentro sanjuanino para sesiones de PRP facial y capilar todos los lunes.
+              </p>
+            </div>
+          </div>
+          <div class="p-6 pt-0">
+            <a href="https://maps.google.com/?q=Clinica+Renacer+San+Juan+Capital" target="_blank" rel="noopener" 
+               class="w-full py-2.5 px-4 rounded-xl border border-stone-300 hover:border-[#A67C52] text-stone-700 hover:text-[#A67C52] text-xs font-semibold flex items-center justify-center gap-2 transition bg-white">
+              <span>📍 Ver en Google Maps</span>
+            </a>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
   <!-- SECCIÓN TURNOS (CALENDARIO Y FORMULARIO) -->
-  <section id="turnos" class="py-20 bg-[#FAF8F5]">
+  <section id="turnos" class="py-20 bg-white">
     <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
       <div class="text-center max-w-xl mx-auto mb-14">
         <span class="text-xs uppercase tracking-[0.25em] text-[#A67C52] font-semibold">Reserva tu momento</span>
         <h2 class="font-serif text-3xl sm:text-4xl text-stone-900 mt-2">Agenda tu Turno</h2>
         <p class="text-sm text-stone-600 mt-3 font-light">
-          Seleccioná un día del calendario y elegí uno de los horarios disponibles.
+          Seleccioná un día del calendario según el cronograma de cada sede para ver los horarios disponibles.
         </p>
       </div>
 
-      <div class="bg-white rounded-3xl p-6 sm:p-10 shadow-sm border border-stone-200/80 grid grid-cols-1 lg:grid-cols-12 gap-8">
+      <div class="bg-[#FAF8F5] rounded-3xl p-6 sm:p-10 shadow-sm border border-stone-200/80 grid grid-cols-1 lg:grid-cols-12 gap-8 relative">
         
         <!-- CALENDARIO (COL IZQUIERDA) -->
         <div class="lg:col-span-6">
           <div class="flex items-center justify-between mb-6">
             <h3 id="currentMonthYear" class="font-serif text-xl font-semibold text-stone-900"></h3>
             <div class="flex space-x-1">
-              <button id="prevMonthBtn" class="p-2 rounded-full hover:bg-stone-100 text-stone-600 transition">
+              <button id="prevMonthBtn" class="p-2 rounded-full hover:bg-stone-200 text-stone-600 transition">
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg>
               </button>
-              <button id="nextMonthBtn" class="p-2 rounded-full hover:bg-stone-100 text-stone-600 transition">
+              <button id="nextMonthBtn" class="p-2 rounded-full hover:bg-stone-200 text-stone-600 transition">
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
               </button>
             </div>
@@ -163,47 +479,73 @@
 
           <!-- Grilla de días -->
           <div id="calendarDays" class="grid grid-cols-7 gap-1"></div>
+
+          <!-- Panel de control de Admin para el DÍA seleccionado -->
+          <div id="adminDayControls" class="hidden mt-4 pt-4 border-t border-stone-200">
+            <div class="flex items-center justify-between bg-amber-50 border border-amber-200 rounded-2xl p-3 text-xs">
+              <span class="text-amber-900 font-medium">Gestión de fecha:</span>
+              <button id="adminToggleDayBlockBtn" class="px-3 py-1.5 rounded-xl bg-stone-900 text-amber-300 font-semibold hover:bg-black transition">
+                Bloquear este Día Completo
+              </button>
+            </div>
+          </div>
         </div>
 
         <!-- HORARIOS Y FORMULARIO (COL DERECHA) -->
-        <div class="lg:col-span-6 lg:border-l lg:border-stone-100 lg:pl-8 flex flex-col justify-between">
+        <div class="lg:col-span-6 lg:border-l lg:border-stone-200 lg:pl-8 flex flex-col justify-between">
           <div>
-            <div class="flex items-center justify-between pb-3 border-b border-stone-100 mb-4">
+            <div class="flex items-center justify-between pb-3 border-b border-stone-200 mb-4">
               <span class="text-xs uppercase tracking-wider text-stone-500 font-semibold">Día seleccionado:</span>
               <span id="selectedDateLabel" class="text-sm font-semibold text-[#A67C52]">Elegí una fecha</span>
             </div>
 
             <div class="mb-6">
-              <span class="text-xs uppercase tracking-wider text-stone-500 font-medium block mb-3">Horarios disponibles:</span>
+              <div class="flex items-center justify-between mb-3">
+                <span class="text-xs uppercase tracking-wider text-stone-500 font-medium">Horarios disponibles:</span>
+                <span id="adminHintSlot" class="hidden text-[11px] text-amber-700 font-semibold">Modo Admin: podés bloquear slots</span>
+              </div>
               <div id="slotsContainer" class="grid grid-cols-2 sm:grid-cols-3 gap-2.5">
                 <p class="text-xs text-stone-400 col-span-full py-4 text-center">Por favor, seleccioná un día en el calendario.</p>
               </div>
             </div>
 
-            <!-- FORMULARIO DE RESERVA -->
-            <form id="bookingForm" class="hidden space-y-3.5 pt-4 border-t border-stone-100">
+            <!-- FORMULARIO DE RESERVA PARA EL CLIENTE -->
+            <form id="bookingForm" class="hidden space-y-3.5 pt-4 border-t border-stone-200">
               <h4 class="text-xs font-semibold text-stone-900 uppercase tracking-wider">Tus datos para confirmar:</h4>
               
               <div>
+                <label class="block text-xs text-stone-600 mb-1">Clínica / Sede de Atención *</label>
+                <select id="clientClinic" required class="w-full text-sm px-3.5 py-2.5 rounded-xl border border-stone-300 focus:outline-none focus:border-[#A67C52] bg-white transition">
+                  <option value="">Selecciona dónde deseas atenderte...</option>
+                  <option value="Jáchal - Clínica Eli Pa Ce">Jáchal - Clínica Eli Pa Ce</option>
+                  <option value="Rodeo - Clínica Santo Domingo">Rodeo - Clínica Santo Domingo</option>
+                  <option value="Pocito - Instituto de la Salud">Pocito - Instituto de la Salud</option>
+                  <option value="Valle Fértil - S.I.M.A">Valle Fértil - S.I.M.A</option>
+                  <option value="Calingasta - CEKYM">Calingasta - CEKYM</option>
+                  <option value="Capital - Clínica RENACER">Capital - Clínica RENACER</option>
+                </select>
+              </div>
+
+              <div>
                 <label class="block text-xs text-stone-600 mb-1">Nombre y Apellido *</label>
                 <input type="text" id="clientName" required placeholder="Ej: Valentina Morales" 
-                       class="w-full text-sm px-3.5 py-2.5 rounded-xl border border-stone-300 focus:outline-none focus:border-[#A67C52] transition">
+                       class="w-full text-sm px-3.5 py-2.5 rounded-xl border border-stone-300 focus:outline-none focus:border-[#A67C52] bg-white transition">
               </div>
 
               <div>
                 <label class="block text-xs text-stone-600 mb-1">WhatsApp / Teléfono *</label>
                 <input type="tel" id="clientPhone" required placeholder="Ej: 264 1234567" 
-                       class="w-full text-sm px-3.5 py-2.5 rounded-xl border border-stone-300 focus:outline-none focus:border-[#A67C52] transition">
+                       class="w-full text-sm px-3.5 py-2.5 rounded-xl border border-stone-300 focus:outline-none focus:border-[#A67C52] bg-white transition">
               </div>
 
               <div>
                 <label class="block text-xs text-stone-600 mb-1">Tratamiento de Interés *</label>
                 <select id="clientTreatment" required class="w-full text-sm px-3.5 py-2.5 rounded-xl border border-stone-300 focus:outline-none focus:border-[#A67C52] bg-white transition">
                   <option value="">Selecciona un tratamiento...</option>
-                  <option value="Blefaroplastia No Quirúrgica">Blefaroplastia No Quirúrgica</option>
-                  <option value="Lifting Plasma Pen">Lifting Plasma Pen</option>
-                  <option value="Eliminación de Manchas / Puntos Rubí">Eliminación de Manchas / Puntos Rubí</option>
-                  <option value="Evaluación & Consulta General">Evaluación & Consulta General</option>
+                  <option value="PRP Facial & Cuello">PRP Facial & Cuello</option>
+                  <option value="PRP Capilar">PRP Capilar</option>
+                  <option value="PRP Corporal">PRP Corporal</option>
+                  <!-- <option value="Evaluación & Consulta Integral">Evaluación & Consulta Integral</option> -->
                 </select>
               </div>
 
@@ -216,8 +558,8 @@
               <div class="w-12 h-12 rounded-full bg-emerald-100 text-emerald-600 mx-auto flex items-center justify-center">
                 <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
               </div>
-              <h5 class="font-serif text-xl font-bold text-stone-900">¡Turno Confirmado!</h5>
-              <p class="text-xs text-stone-600">Te contactaremos por WhatsApp con las indicaciones previas al tratamiento.</p>
+              <h5 class="font-serif text-xl font-bold text-stone-900">¡Turno Pre-reservado!</h5>
+              <p class="text-xs text-stone-600">Completá el paso de la seña para asegurar tu lugar.</p>
             </div>
           </div>
         </div>
@@ -225,32 +567,148 @@
     </div>
   </section>
 
+  <!-- SECCIÓN CONTACTO Y SOBRE MÍ -->
+  <section id="contacto" class="py-20 bg-[#FAF8F5] border-t border-stone-200/70">
+    <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+      
+      <div class="text-center max-w-xl mx-auto mb-16">
+        <span class="text-xs uppercase tracking-[0.25em] text-[#A67C52] font-semibold">Conocé a tu Especialista</span>
+        <h2 class="font-serif text-3xl sm:text-4xl text-stone-900 mt-2">Sobre Mí & Contacto</h2>
+        <div class="h-0.5 w-12 bg-[#A67C52] mx-auto mt-4"></div>
+      </div>
+
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
+        
+        <div class="lg:col-span-5 flex justify-center">
+          <div class="relative w-full max-w-sm">
+            <div class="absolute -inset-2 rounded-3xl bg-gradient-to-tr from-[#A67C52]/30 to-[#EFE9DF] blur-md -z-10"></div>
+            <div class="w-full aspect-[4/5] rounded-3xl overflow-hidden shadow-lg border border-stone-200 bg-white flex items-center justify-center">
+              <img id="fotoPerfil" src="perfil.jpg" alt="Especialista en PRP y Estética" 
+                   onerror="this.onerror=null; this.src='https://images.unsplash.com/photo-1594824813593-366a7b29a212?auto=format&fit=crop&w=800&q=80';"
+                   class="w-full h-full object-cover object-center">
+            </div>
+          </div>
+        </div>
+
+        <div class="lg:col-span-7 space-y-6">
+          <div>
+            <span class="text-xs font-semibold uppercase tracking-wider text-[#A67C52]">Especialista en Plasma Rico en Plaquetas (PRP) & Cosmiatría</span>
+            <h3 class="font-serif text-3xl sm:text-4xl text-stone-900 mt-1">Patricia Gil</h3>
+            <p class="text-sm text-stone-600 mt-3 leading-relaxed font-light">
+              Apasionada por la salud y regeneración celular de la piel. Mi objetivo es brindarte resultados visibles y naturales a través de medicina estética no invasiva y regenerativa, con un trato cercano, seguro y protocolos estériles en cada sesión.
+            </p>
+          </div>
+
+          <div class="p-6 bg-white rounded-2xl border border-stone-200/80 space-y-4">
+            <h4 class="font-serif text-lg font-bold text-stone-900 flex items-center gap-2">
+              <span class="text-[#A67C52]">✦</span> Formación y Certificaciones
+            </h4>
+            <ul class="space-y-2.5 text-xs text-stone-600">
+              <li class="flex items-start gap-2.5">
+                <span class="text-[#A67C52] font-bold">✓</span>
+                <span><strong>Especialización en Plasma Rico en Plaquetas (PRP):</strong> Extracción, centrifugado clínico, activación y bioestimulación con Dermapen facial, capilar y corporal.</span>
+              </li>
+              <li class="flex items-start gap-2.5">
+                <span class="text-[#A67C52] font-bold">✓</span>
+                <span><strong>Certificación en Bioseguridad Hospitalaria y Asepsia:</strong> Protocolos clínicos rigurosos y material 100% descartable.</span>
+              </li>
+              <li class="flex items-start gap-2.5">
+                <span class="text-[#A67C52] font-bold">✓</span>
+                <span><strong>Cosmetología & Cosmiatría Clínica:</strong> Tratamiento avanzado de fotoenvejecimiento, flacidez y regeneración celular.</span>
+              </li>
+            </ul>
+          </div>
+
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2">
+            <a href="https://wa.me/5492645447043" target="_blank" rel="noopener" 
+               class="flex items-center gap-3.5 p-4 rounded-2xl border border-emerald-200 bg-emerald-50/60 hover:bg-emerald-100/70 transition">
+              <div class="w-10 h-10 rounded-xl bg-emerald-600 text-white flex items-center justify-center font-bold text-lg">
+                💬
+              </div>
+              <div class="text-left">
+                <span class="block text-[11px] uppercase tracking-wider text-emerald-800 font-semibold">WhatsApp Directo</span>
+                <span class="text-xs font-bold text-stone-800">+54 9 264 544-7043</span>
+              </div>
+            </a>
+
+            <a href="https://www.instagram.com/eternalplasmaderm" target="_blank" rel="noopener" 
+               class="flex items-center gap-3.5 p-4 rounded-2xl border border-amber-200 bg-white hover:bg-[#FDFBF7] transition">
+              <div class="w-10 h-10 rounded-xl bg-[#A67C52] text-white flex items-center justify-center font-bold text-lg">
+                📸
+              </div>
+              <div class="text-left">
+                <span class="block text-[11px] uppercase tracking-wider text-[#A67C52] font-semibold">Instagram Oficial</span>
+                <span class="text-xs font-bold text-stone-800">@eternalplasmaderm</span>
+              </div>
+            </a>
+          </div>
+
+          <div class="flex items-center gap-2 text-xs text-stone-500 pt-1">
+            <svg class="w-4 h-4 text-[#A67C52]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+            <span>Atención con turno en Jáchal, Rodeo, Calingasta, Valle Fértil, Capital y Pocito (San Juan).</span>
+          </div>
+
+        </div>
+      </div>
+    </div>
+  </section>
+
   <!-- MODAL ADMIN -->
   <div id="adminModal" class="fixed inset-0 bg-stone-900/60 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
-    <div class="bg-white rounded-3xl max-w-2xl w-full p-6 sm:p-8 shadow-2xl max-h-[90vh] flex flex-col">
+    <div class="bg-white rounded-3xl max-w-3xl w-full p-6 sm:p-8 shadow-2xl max-h-[90vh] flex flex-col">
       <div class="flex items-center justify-between pb-4 border-b border-stone-100">
-        <h3 class="font-serif text-2xl text-stone-900">Panel de Administración de Turnos</h3>
+        <div>
+          <h3 class="font-serif text-2xl text-stone-900 font-bold">Panel Profesional de Control</h3>
+          <p class="text-xs text-stone-500">Gestión de señas, bloqueo de turnos y agenda completa</p>
+        </div>
         <button id="closeAdminBtn" class="text-stone-400 hover:text-stone-700 text-2xl font-light">&times;</button>
       </div>
 
       <!-- Pantalla de Login Admin -->
       <div id="adminLoginView" class="py-10 text-center max-w-xs mx-auto space-y-4">
-        <p class="text-xs text-stone-500">Ingresá la clave de acceso para ver los turnos y datos de los clientes.</p>
-        <input type="password" id="adminPasswordInput" placeholder="Contraseña de administrador" 
-               class="w-full text-sm px-4 py-2.5 rounded-xl border border-stone-300 focus:outline-none focus:border-[#A67C52] text-center">
+        <p class="text-xs text-stone-500">Ingresá tu contraseña profesional para activar las funciones especiales.</p>
+        
+        <div class="relative flex items-center">
+          <input type="password" id="adminPasswordInput" placeholder="Contraseña de administrador" 
+                 class="w-full text-sm pl-4 pr-11 py-2.5 rounded-xl border border-stone-300 focus:outline-none focus:border-[#A67C52] text-center">
+          <button type="button" id="toggleAdminPassBtn" title="Mostrar u ocultar contraseña" 
+                  class="absolute right-3 p-1 text-stone-400 hover:text-stone-700 transition">
+            <svg id="eyeIcon" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+            </svg>
+          </button>
+        </div>
+
         <button id="adminLoginBtn" class="btn-primary w-full py-2.5 rounded-xl text-xs uppercase font-medium tracking-wider">
-          Ingresar
+          Iniciar Sesión
         </button>
         <p id="adminLoginError" class="text-xs text-rose-500 hidden font-medium">Contraseña incorrecta</p>
       </div>
 
-      <!-- Pantalla de Listado de Reservas -->
-      <div id="adminDashboardView" class="hidden flex-1 overflow-y-auto pt-4 space-y-3">
-        <div class="flex items-center justify-between mb-2">
-          <span class="text-xs text-stone-500 font-semibold uppercase">Listado de Turnos Confirmados</span>
-          <button id="refreshAdminBtn" class="text-xs text-[#A67C52] hover:underline font-medium">Actualizar</button>
+      <!-- Pantalla de Listado de Reservas y Gestión Especial -->
+      <div id="adminDashboardView" class="hidden flex-1 overflow-y-auto pt-4 space-y-4">
+        
+        <!-- Filtros y acciones rápidas -->
+        <div class="flex flex-wrap items-center justify-between gap-3 p-3 bg-stone-50 rounded-2xl border border-stone-200 text-xs">
+          <div class="flex items-center gap-2">
+            <span class="font-bold text-stone-700">Filtro:</span>
+            <select id="adminStatusFilter" class="px-2.5 py-1.5 rounded-xl border border-stone-300 bg-white font-medium">
+              <option value="todos">Todos los registros</option>
+              <option value="pendiente_sena">⏳ Solo Pendientes de Seña</option>
+              <option value="confirmed">✅ Solo Confirmados</option>
+              <option value="bloqueado">🚫 Bloqueados por Admin</option>
+            </select>
+          </div>
+          <div class="flex items-center gap-2">
+            <button id="refreshAdminBtn" class="px-3 py-1.5 rounded-xl bg-white border border-stone-300 hover:border-[#A67C52] text-stone-700 font-medium transition">
+              🔄 Actualizar Datos
+            </button>
+          </div>
         </div>
-        <div id="adminAppointmentsList" class="space-y-2.5">
+
+        <!-- Lista de tarjetas renderizadas -->
+        <div id="adminAppointmentsList" class="space-y-3">
           <!-- Renderizado dinámico desde app.js -->
         </div>
       </div>
@@ -266,7 +724,9 @@
       </div>
       <div class="flex items-center space-x-6 text-xs">
         <a href="https://www.instagram.com/eternalplasmaderm" target="_blank" rel="noopener" class="hover:text-stone-100 transition">Instagram Oficial</a>
+        <a href="#clinicas" class="hover:text-stone-100 transition">Clínicas</a>
         <a href="#turnos" class="hover:text-stone-100 transition">Reservas</a>
+        <a href="#contacto" class="hover:text-stone-100 transition">Contacto</a>
       </div>
     </div>
   </footer>
