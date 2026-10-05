@@ -3,7 +3,7 @@
    ============================================================ */
 
 const SUPABASE_URL = "https://izmumxhupaybploxfbft.supabase.co";
-const SUPABASE_KEY = "sb_publishable_oavikFmXuEZM5FR0fyMaew_KXnZAivY";
+const SUPABASE_KEY = "sb_publishable_RN84bCn7QpXtEAYQaWoxBg_WjrNw0nU";
 const ADMIN_PASSWORD = "eternaladmin2026";
 
 // DATOS DE MERCADO PAGO Y CONTACTO
