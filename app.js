@@ -3,7 +3,6 @@
    ============================================================ */
 
 const SUPABASE_URL = "https://izmumxhupaybploxfbft.supabase.co";
-// Mantiene tu clave válida con el cero (0)
 const SUPABASE_KEY = "sb_publishable_oavikFmXuEZM5FR0fyMaew_KXnZAivY";
 const ADMIN_PASSWORD = "eternaladmin2026";
 
@@ -16,6 +15,13 @@ const WHATSAPP_NUMERO = "5492645447043";
 const HORARIOS_SEMANA = ["16:00", "17:15", "18:30", "19:45"];
 const HORARIOS_SABADO = ["09:30", "11:00", "12:30", "15:00", "16:30", "18:00", "19:30"];
 
+// Encabezados REST estándar y completos para Supabase PostgREST
+const getHeaders = (extraHeaders = {}) => ({
+  "apikey": SUPABASE_KEY,
+  "Authorization": `Bearer ${SUPABASE_KEY}`,
+  ...extraHeaders
+});
+
 // Estado de sesión Admin
 let isAdminLogged = sessionStorage.getItem("eternal_admin_auth") === "true";
 
@@ -23,7 +29,7 @@ let isAdminLogged = sessionStorage.getItem("eternal_admin_auth") === "true";
 function getClinicScheduleForDate(dateObj) {
   const dayOfWeek = dateObj.getDay(); // 0: Dom, 1: Lun, 2: Mar, 3: Mié, 4: Jue, 5: Vie, 6: Sáb
   const dayOfMonth = dateObj.getDate();
-  const occurrence = Math.ceil(dayOfMonth / 7); // 1 = primero del mes, 2 = segundo del mes, etc.
+  const occurrence = Math.ceil(dayOfMonth / 7);
 
   // Lunes: Capital
   if (dayOfWeek === 1) {
@@ -41,7 +47,7 @@ function getClinicScheduleForDate(dateObj) {
     };
   }
 
-  // Jueves: Solo el 2º jueves del mes en Jáchal (el resto bloqueados)
+  // Jueves: Solo el 2º jueves del mes en Jáchal
   if (dayOfWeek === 4) {
     if (occurrence === 2) {
       return {
@@ -52,7 +58,7 @@ function getClinicScheduleForDate(dateObj) {
     return { allowed: false, clinic: null };
   }
 
-  // Viernes: 1º viernes en Valle Fértil, 2º viernes en Rodeo (el resto bloqueados)
+  // Viernes: 1º viernes en Valle Fértil, 2º viernes en Rodeo
   if (dayOfWeek === 5) {
     if (occurrence === 1) {
       return {
@@ -80,14 +86,12 @@ function getClinicScheduleForDate(dateObj) {
   return { allowed: false, clinic: null };
 }
 
-// Cliente REST nativo configurado para las nuevas Publishable Keys
+// Cliente REST con headers completos y parseo seguro
 const db = {
   async getBookedRecords(dateStr) {
     const res = await fetch(`${SUPABASE_URL}/rest/v1/appointments?appointment_date=eq.${dateStr}&select=*`, {
       method: "GET",
-      headers: {
-        "apikey": SUPABASE_KEY
-      }
+      headers: getHeaders()
     });
     if (!res.ok) throw new Error(await res.text());
     return await res.json();
@@ -96,11 +100,10 @@ const db = {
   async insertAppointment(payload) {
     const res = await fetch(`${SUPABASE_URL}/rest/v1/appointments`, {
       method: "POST",
-      headers: {
-        "apikey": SUPABASE_KEY,
+      headers: getHeaders({
         "Content-Type": "application/json",
         "Prefer": "return=representation"
-      },
+      }),
       body: JSON.stringify(payload)
     });
     if (!res.ok) {
@@ -113,9 +116,7 @@ const db = {
   async getAllAppointments() {
     const res = await fetch(`${SUPABASE_URL}/rest/v1/appointments?select=*&order=appointment_date.asc,appointment_time.asc`, {
       method: "GET",
-      headers: {
-        "apikey": SUPABASE_KEY
-      }
+      headers: getHeaders()
     });
     if (!res.ok) throw new Error(await res.text());
     return await res.json();
@@ -124,10 +125,9 @@ const db = {
   async updateStatus(id, newStatus) {
     const res = await fetch(`${SUPABASE_URL}/rest/v1/appointments?id=eq.${id}`, {
       method: "PATCH",
-      headers: {
-        "apikey": SUPABASE_KEY,
+      headers: getHeaders({
         "Content-Type": "application/json"
-      },
+      }),
       body: JSON.stringify({ status: newStatus })
     });
     if (!res.ok) throw new Error(await res.text());
@@ -136,9 +136,7 @@ const db = {
   async deleteAppointment(id) {
     const res = await fetch(`${SUPABASE_URL}/rest/v1/appointments?id=eq.${id}`, {
       method: "DELETE",
-      headers: {
-        "apikey": SUPABASE_KEY
-      }
+      headers: getHeaders()
     });
     if (!res.ok) throw new Error(await res.text());
   }
@@ -147,6 +145,7 @@ const db = {
 let currentDate = new Date();
 let selectedDateString = null;
 let selectedTimeSlot = null;
+let currentAssignedClinic = null;
 
 const MONTH_NAMES = [
   "Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio",
@@ -171,7 +170,7 @@ document.addEventListener("DOMContentLoaded", () => {
   const bookingSuccessMessage = document.getElementById("bookingSuccessMessage");
   const clientClinicSelect = document.getElementById("clientClinic");
 
-  // Elementos de Admin
+  // Elementos Admin
   const adminTopBar = document.getElementById("adminTopBar");
   const lockIconDefault = document.getElementById("lockIconDefault");
   const lockIconLogged = document.getElementById("lockIconLogged");
@@ -195,7 +194,6 @@ document.addEventListener("DOMContentLoaded", () => {
   const adminStatusFilter = document.getElementById("adminStatusFilter");
   const refreshAdminBtn = document.getElementById("refreshAdminBtn");
 
-  // Sincronizar presencia visual de Administrador
   function syncAdminUI() {
     if (isAdminLogged) {
       if (adminTopBar) adminTopBar.classList.remove("hidden");
@@ -212,7 +210,6 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   }
 
-  // Alternar ver/ocultar contraseña
   if (toggleAdminPassBtn && adminPasswordInput) {
     toggleAdminPassBtn.addEventListener("click", () => {
       const isPassword = adminPasswordInput.type === "password";
@@ -275,6 +272,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
         dayBtn.addEventListener("click", () => {
           selectedDateString = dateStr;
+          currentAssignedClinic = scheduleInfo.clinic;
           renderCalendar();
           loadAvailableSlots(dateStr, dateObj.getDay(), scheduleInfo.clinic);
         });
@@ -301,11 +299,12 @@ document.addEventListener("DOMContentLoaded", () => {
       const sched = getClinicScheduleForDate(dateObj);
       assignedClinic = sched.clinic;
     }
+    currentAssignedClinic = assignedClinic;
 
-    // Configurar automáticamente la clínica habilitada para este día
+    // Asignación de clínica visual sin bloquear el valor en el POST
     if (clientClinicSelect && assignedClinic) {
       clientClinicSelect.innerHTML = `<option value="${assignedClinic}" selected>${assignedClinic}</option>`;
-      clientClinicSelect.disabled = true; // Bloqueado a la clínica de este día
+      clientClinicSelect.classList.add("bg-stone-100", "cursor-not-allowed");
     }
 
     const currentDayHours = (dayOfWeek === 6) ? HORARIOS_SABADO : HORARIOS_SEMANA;
@@ -376,7 +375,6 @@ document.addEventListener("DOMContentLoaded", () => {
 
       slotWrapper.appendChild(btn);
 
-      // Botón de bloqueo individual para la Administradora
       if (isAdminLogged) {
         const adminSlotActionBtn = document.createElement("button");
         adminSlotActionBtn.type = "button";
@@ -411,7 +409,6 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 
-  // Acción de Administrador: Bloquear o Desbloquear día completo
   if (adminToggleDayBlockBtn) {
     adminToggleDayBlockBtn.addEventListener("click", async () => {
       if (!selectedDateString) return;
@@ -447,7 +444,7 @@ document.addEventListener("DOMContentLoaded", () => {
         return;
       }
 
-      const clientClinic = clientClinicSelect.value;
+      const clientClinic = currentAssignedClinic || (clientClinicSelect ? clientClinicSelect.value : "Sede General");
       const clientName = document.getElementById("clientName").value.trim();
       const clientPhone = document.getElementById("clientPhone").value.trim();
       const clientTreatment = document.getElementById("clientTreatment").value;
@@ -674,7 +671,6 @@ document.addEventListener("DOMContentLoaded", () => {
         </div>
       `;
 
-      // Evento: Confirmar seña recibida
       const confirmBtn = card.querySelector('.confirm-btn');
       if (confirmBtn) {
         confirmBtn.addEventListener('click', async () => {
@@ -693,7 +689,6 @@ document.addEventListener("DOMContentLoaded", () => {
         });
       }
 
-      // Evento: Liberar turno o desbloquear horario
       const deleteBtn = card.querySelector('.delete-btn');
       if (deleteBtn) {
         deleteBtn.addEventListener('click', async () => {
@@ -743,7 +738,6 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 
-  // Inicializar estado y calendario
   syncAdminUI();
   renderCalendar();
 });
