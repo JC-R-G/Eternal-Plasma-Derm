@@ -3,7 +3,7 @@
    ============================================================ */
 
 const SUPABASE_URL = "https://izmumxhupaybploxfbft.supabase.co";
-const SUPABASE_KEY = "sb_publishable_RN84bCn7QpXtEAYQaWoxBg_WjrNw0nU";
+const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Iml6bXVteGh1cGF5YnBsb3hmYmZ0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTEwMzE3ODMsImV4cCI6MjEwNjYwNzc4M30.sHPpcPs1J6OFjnosRLynWQe3sBZlvqS26t-x3Dn5bVM";
 const ADMIN_PASSWORD = "eternaladmin2026";
 
 // DATOS DE MERCADO PAGO Y CONTACTO
