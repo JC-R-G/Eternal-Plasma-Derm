@@ -620,7 +620,7 @@ document.addEventListener("DOMContentLoaded", () => {
             <a href="${waLink}" target="_blank" rel="noopener" class="block text-center w-full py-3 rounded-xl bg-emerald-600 text-white font-medium text-xs tracking-wider uppercase hover:bg-emerald-700 transition shadow">
               Enviar Comprobante por WhatsApp
             </a>
-            <p class="text-[11px] text-stone-400 text-center">Tenés 2 horas para enviar el comprobante antes de que el turno se libere[cite: 36].</p>
+            <p class="text-[11px] text-stone-400 text-center">Tenés 2 horas para enviar el comprobante antes de que el turno se libere.</p>
           </div>
         `;
         bookingSuccessMessage.classList.remove("hidden");
@@ -724,7 +724,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
   async function fetchAdminAppointments() {
     if (!adminAppointmentsList) return;
-    adminAppointmentsList.innerHTML = `<p class="text-xs text-stone-400 py-6 text-center">Cargando base de datos en tiempo real...[cite: 36]</p>`;
+    adminAppointmentsList.innerHTML = `<p class="text-xs text-stone-400 py-6 text-center">Cargando base de datos en tiempo real...</p>`;
 
     let list = [];
     try {
