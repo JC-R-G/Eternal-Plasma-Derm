@@ -6,7 +6,7 @@ const SUPABASE_URL = "https://izmumxhupaybploxfbft.supabase.co";
 const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Iml6bXVteGh1cGF5YnBsb3hmYmZ0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTEwMzE3ODMsImV4cCI6MjEwNjYwNzc4M30.sHPpcPs1J6OFjnosRLynWQe3sBZlvqS26t-x3Dn5bVM";
 const ADMIN_PASSWORD = "eternaladmin2026";
 
-// DATOS DE MERCADO PAGO Y CONTACTO
+// DATOS DE MERCADO PAGO Y CONTACTO (Teléfono celular con 549 para WhatsApp)
 const MP_ALIAS = "patogil.mp";
 const SENA_VALOR = "$20.000";
 const WHATSAPP_NUMERO = "5492645447043";
@@ -168,6 +168,28 @@ const db = {
   }
 };
 
+// ============================================================
+// LIMPIEZA AUTOMÁTICA DE TURNOS PENDIENTES CON MÁS DE 12 HORAS
+// ============================================================
+async function cleanupExpiredAppointments() {
+  try {
+    const all = await db.getAllAppointments();
+    const now = new Date().getTime();
+    const TWELVE_HOURS_MS = 12 * 60 * 60 * 1000;
+
+    for (const app of all) {
+      if (app.status === 'pendiente_sena' && app.created_at) {
+        const createdAtTime = new Date(app.created_at).getTime();
+        if (now - createdAtTime > TWELVE_HOURS_MS) {
+          await db.deleteAppointment(app.id);
+        }
+      }
+    }
+  } catch (err) {
+    console.warn("Aviso en la limpieza automática de turnos expirados:", err);
+  }
+}
+
 let currentDate = new Date();
 let selectedDateString = null;
 let selectedTimeSlot = null;
@@ -185,7 +207,7 @@ function getFormattedDate(date) {
   return `${y}-${m}-${d}`;
 }
 
-document.addEventListener("DOMContentLoaded", () => {
+document.addEventListener("DOMContentLoaded", async () => {
   const monthYearLabel = document.getElementById("currentMonthYear");
   const calendarDaysGrid = document.getElementById("calendarDays");
   const prevMonthBtn = document.getElementById("prevMonthBtn");
@@ -341,6 +363,9 @@ document.addEventListener("DOMContentLoaded", () => {
     if (slotsContainer) {
       slotsContainer.innerHTML = `<p class="text-xs text-stone-400 col-span-full py-2 text-center">Consultando disponibilidad...</p>`;
     }
+
+    // Limpieza reactiva de turnos vencidos antes de listar horarios
+    await cleanupExpiredAppointments();
 
     const parts = dateStr.split('-');
     const dateObj = new Date(parts[0], parts[1] - 1, parts[2]);
@@ -609,7 +634,7 @@ document.addEventListener("DOMContentLoaded", () => {
               </a>
             </div>
 
-            <p class="text-[11px] text-stone-400 text-center">Tenés 2 horas para enviar el comprobante antes de que el turno se libere.</p>
+            <p class="text-[11px] text-stone-400 text-center">Tenés 12 horas para enviar el comprobante antes de que el turno se libere.</p>
           </div>
         `;
         bookingSuccessMessage.classList.remove("hidden");
@@ -710,6 +735,9 @@ document.addEventListener("DOMContentLoaded", () => {
   async function fetchAdminAppointments() {
     if (!adminAppointmentsList) return;
     adminAppointmentsList.innerHTML = `<p class="text-xs text-stone-400 py-6 text-center">Cargando base de datos en tiempo real...</p>`;
+
+    // Limpieza de turnos con más de 12 horas antes de renderizar
+    await cleanupExpiredAppointments();
 
     let list = [];
     try {
@@ -973,4 +1001,6 @@ document.addEventListener("DOMContentLoaded", () => {
 
   syncAdminUI();
   renderCalendar();
+  // Limpieza inicial al abrir la página
+  cleanupExpiredAppointments();
 });
