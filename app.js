@@ -1,92 +1,121 @@
 /* ============================================================
-   ETERNAL PLASMA DERM - LÓGICA DE TURNOS Y MODO PROFESIONAL
+   ETERNAL PLASMA DERM - LÓGICA DE TURNOS Y GESTIÓN DE DEUDORES
    ============================================================ */
 
 const SUPABASE_URL = "https://izmumxhupaybploxfbft.supabase.co";
 const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Iml6bXVteGh1cGF5YnBsb3hmYmZ0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTEwMzE3ODMsImV4cCI6MjEwNjYwNzc4M30.sHPpcPs1J6OFjnosRLynWQe3sBZlvqS26t-x3Dn5bVM";
 const ADMIN_PASSWORD = "eternaladmin2026";
 
-// DATOS DE MERCADO PAGO Y CONTACTO
+// DATOS DE MERCADO PAGO Y CONTACTO (Teléfono celular con 549 para WhatsApp)
 const MP_ALIAS = "patogil.mp";
 const SENA_VALOR = "$20.000";
 const WHATSAPP_NUMERO = "5492645447043";
 
-// Esquema de horarios según el día
-const HORARIOS_SEMANA = ["16:00", "17:15", "18:30", "19:45"];
-const HORARIOS_SABADO = ["09:30", "11:00", "12:30", "15:00", "16:30", "18:00", "19:30"];
+// ============================================================
+// HORARIOS PERSONALIZADOS PARA CADA DÍA Y CLÍNICA
+// ============================================================
+const HORARIOS_POR_SEDE = {
+  "Capital - Clínica RENACER": [
+    "16:00", "17:15", "18:30", "19:45"
+  ],
+  "Pocito - Instituto de la Salud": [
+    "15:30", "16:45", "18:00", "19:15"
+  ],
+  "Jáchal - Clínica Eli Pa Ce": [
+    "09:30", "10:45", "12:00", "16:00", "17:15", "18:30"
+  ],
+  "Valle Fértil - S.I.M.A": [
+    "09:30", "11:00", "12:30", "16:00", "17:30", "19:00"
+  ],
+  "Rodeo - Clínica Santo Domingo": [
+    "10:00", "11:30", "15:30", "17:00", "18:30"
+  ],
+  "Calingasta - CEKYM": [
+    "09:30", "11:00", "12:30", "15:00", "16:30", "18:00"
+  ]
+};
 
-// Encabezados REST estándar y completos para Supabase PostgREST
+const HORARIOS_POR_DEFECTO = ["16:00", "17:15", "18:30", "19:45"];
+
 const getHeaders = (extraHeaders = {}) => ({
   "apikey": SUPABASE_KEY,
   "Authorization": `Bearer ${SUPABASE_KEY}`,
   ...extraHeaders
 });
 
-// Estado de sesión Admin
 let isAdminLogged = sessionStorage.getItem("eternal_admin_auth") === "true";
+
+// Helper: Formatea cualquier número argentino a +54 9 ... para WhatsApp y BD
+function formatToArgentinaWhatsApp(inputStr) {
+  let cleaned = String(inputStr || '').replace(/\D/g, '');
+
+  if (cleaned.startsWith('549')) {
+    cleaned = cleaned.slice(3);
+  } else if (cleaned.startsWith('54')) {
+    cleaned = cleaned.slice(2);
+  }
+
+  if (cleaned.startsWith('0')) {
+    cleaned = cleaned.slice(1);
+  }
+
+  if (cleaned.startsWith('26415')) {
+    cleaned = '264' + cleaned.slice(5);
+  }
+
+  // Guarda y formatea internamente con +54 9 para compatibilidad celular argentina
+  return `+54 9 ${cleaned}`;
+}
+
+// Helper: Extrae solo dígitos sin prefijos para comparaciones
+function normalizePhone(str) {
+  let digits = String(str || '').replace(/\D/g, '');
+  if (digits.startsWith('549')) digits = digits.slice(3);
+  else if (digits.startsWith('54')) digits = digits.slice(2);
+  if (digits.startsWith('0')) digits = digits.slice(1);
+  if (digits.startsWith('26415')) digits = '264' + digits.slice(5);
+  return digits;
+}
 
 // Helper: Determina si una fecha está permitida y a qué clínica corresponde
 function getClinicScheduleForDate(dateObj) {
-  const dayOfWeek = dateObj.getDay(); // 0: Dom, 1: Lun, 2: Mar, 3: Mié, 4: Jue, 5: Vie, 6: Sáb
+  const dayOfWeek = dateObj.getDay();
   const dayOfMonth = dateObj.getDate();
   const occurrence = Math.ceil(dayOfMonth / 7);
 
-  // Lunes: Capital
   if (dayOfWeek === 1) {
-    return {
-      allowed: true,
-      clinic: "Capital - Clínica RENACER"
-    };
+    return { allowed: true, clinic: "Capital - Clínica RENACER" };
   }
-
-  // Miércoles: Pocito
   if (dayOfWeek === 3) {
-    return {
-      allowed: true,
-      clinic: "Pocito - Instituto de la Salud"
-    };
+    return { allowed: true, clinic: "Pocito - Instituto de la Salud" };
   }
-
-  // Jueves: Solo el 2º jueves del mes en Jáchal
   if (dayOfWeek === 4) {
     if (occurrence === 2) {
-      return {
-        allowed: true,
-        clinic: "Jáchal - Clínica Eli Pa Ce"
-      };
+      return { allowed: true, clinic: "Jáchal - Clínica Eli Pa Ce" };
     }
     return { allowed: false, clinic: null };
   }
-
-  // Viernes: 1º viernes en Valle Fértil, 2º viernes en Rodeo
   if (dayOfWeek === 5) {
     if (occurrence === 1) {
-      return {
-        allowed: true,
-        clinic: "Valle Fértil - S.I.M.A"
-      };
+      return { allowed: true, clinic: "Valle Fértil - S.I.M.A" };
     } else if (occurrence === 2) {
-      return {
-        allowed: true,
-        clinic: "Rodeo - Clínica Santo Domingo"
-      };
+      return { allowed: true, clinic: "Rodeo - Clínica Santo Domingo" };
+    }
+    return { allowed: false, clinic: null };
+  }
+  if (dayOfWeek === 6) {
+    if (occurrence === 1) {
+      return { allowed: true, clinic: "Valle Fértil - S.I.M.A" };
+    } else if (occurrence === 2) {
+      return { allowed: true, clinic: "Calingasta - CEKYM" };
     }
     return { allowed: false, clinic: null };
   }
 
-  // Sábados: Valle Fértil
-  if (dayOfWeek === 6) {
-    return {
-      allowed: true,
-      clinic: "Valle Fértil - S.I.M.A"
-    };
-  }
-
-  // Martes y Domingos cerrados
   return { allowed: false, clinic: null };
 }
 
-// Cliente REST con headers completos y parseo seguro
+// Métodos de base de datos para citas y deudores
 const db = {
   async getBookedRecords(dateStr) {
     const res = await fetch(`${SUPABASE_URL}/rest/v1/appointments?appointment_date=eq.${dateStr}&select=*`, {
@@ -106,10 +135,7 @@ const db = {
       }),
       body: JSON.stringify(payload)
     });
-    if (!res.ok) {
-      const err = await res.text();
-      throw new Error(err);
-    }
+    if (!res.ok) throw new Error(await res.text());
     return await res.json();
   },
 
@@ -135,6 +161,36 @@ const db = {
 
   async deleteAppointment(id) {
     const res = await fetch(`${SUPABASE_URL}/rest/v1/appointments?id=eq.${id}`, {
+      method: "DELETE",
+      headers: getHeaders()
+    });
+    if (!res.ok) throw new Error(await res.text());
+  },
+
+  async getAllDebtors() {
+    const res = await fetch(`${SUPABASE_URL}/rest/v1/debtors?select=*&order=id.desc`, {
+      method: "GET",
+      headers: getHeaders()
+    });
+    if (!res.ok) throw new Error(await res.text());
+    return await res.json();
+  },
+
+  async insertDebtor(payload) {
+    const res = await fetch(`${SUPABASE_URL}/rest/v1/debtors`, {
+      method: "POST",
+      headers: getHeaders({
+        "Content-Type": "application/json",
+        "Prefer": "return=representation"
+      }),
+      body: JSON.stringify(payload)
+    });
+    if (!res.ok) throw new Error(await res.text());
+    return await res.json();
+  },
+
+  async deleteDebtor(id) {
+    const res = await fetch(`${SUPABASE_URL}/rest/v1/debtors?id=eq.${id}`, {
       method: "DELETE",
       headers: getHeaders()
     });
@@ -194,6 +250,16 @@ document.addEventListener("DOMContentLoaded", () => {
   const adminStatusFilter = document.getElementById("adminStatusFilter");
   const refreshAdminBtn = document.getElementById("refreshAdminBtn");
 
+  // Elementos Pestañas Admin y Deudores
+  const tabTurnosBtn = document.getElementById("tabTurnosBtn");
+  const tabDeudoresBtn = document.getElementById("tabDeudoresBtn");
+  const tabTurnosContent = document.getElementById("tabTurnosContent");
+  const tabDeudoresContent = document.getElementById("tabDeudoresContent");
+  const debtorsCountBadge = document.getElementById("debtorsCountBadge");
+  const addDebtorForm = document.getElementById("addDebtorForm");
+  const debtorsListContainer = document.getElementById("debtorsListContainer");
+  const refreshDebtorsBtn = document.getElementById("refreshDebtorsBtn");
+
   function syncAdminUI() {
     if (isAdminLogged) {
       if (adminTopBar) adminTopBar.classList.remove("hidden");
@@ -208,6 +274,24 @@ document.addEventListener("DOMContentLoaded", () => {
       if (adminHintSlot) adminHintSlot.classList.add("hidden");
       if (adminDayControls) adminDayControls.classList.add("hidden");
     }
+  }
+
+  // Switch de Pestañas en Admin
+  if (tabTurnosBtn && tabDeudoresBtn) {
+    tabTurnosBtn.addEventListener("click", () => {
+      tabTurnosBtn.className = "pb-2.5 border-b-2 border-[#A67C52] text-[#A67C52] font-bold transition";
+      tabDeudoresBtn.className = "pb-2.5 border-b-2 border-transparent text-stone-500 hover:text-stone-900 transition flex items-center gap-1.5";
+      tabTurnosContent.classList.remove("hidden");
+      tabDeudoresContent.classList.add("hidden");
+    });
+
+    tabDeudoresBtn.addEventListener("click", () => {
+      tabDeudoresBtn.className = "pb-2.5 border-b-2 border-[#A67C52] text-[#A67C52] font-bold transition flex items-center gap-1.5";
+      tabTurnosBtn.className = "pb-2.5 border-b-2 border-transparent text-stone-500 hover:text-stone-900 transition";
+      tabDeudoresContent.classList.remove("hidden");
+      tabTurnosContent.classList.add("hidden");
+      fetchDebtorsList();
+    });
   }
 
   if (toggleAdminPassBtn && adminPasswordInput) {
@@ -301,13 +385,15 @@ document.addEventListener("DOMContentLoaded", () => {
     }
     currentAssignedClinic = assignedClinic;
 
-    // Asignación de clínica visual sin bloquear el valor en el POST
     if (clientClinicSelect && assignedClinic) {
       clientClinicSelect.innerHTML = `<option value="${assignedClinic}" selected>${assignedClinic}</option>`;
       clientClinicSelect.classList.add("bg-stone-100", "cursor-not-allowed");
     }
 
-    const currentDayHours = (dayOfWeek === 6) ? HORARIOS_SABADO : HORARIOS_SEMANA;
+    const currentDayHours = (assignedClinic && HORARIOS_POR_SEDE[assignedClinic])
+      ? HORARIOS_POR_SEDE[assignedClinic]
+      : HORARIOS_POR_DEFECTO;
+
     let dayRecords = [];
 
     try {
@@ -435,6 +521,9 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 
+  // ============================================================
+  // RESERVA DE TURNO (CON VALIDACIÓN DE PREFIJO +54 Y DEUDA)
+  // ============================================================
   if (bookingForm) {
     bookingForm.addEventListener("submit", async (e) => {
       e.preventDefault();
@@ -446,22 +535,58 @@ document.addEventListener("DOMContentLoaded", () => {
 
       const clientClinic = currentAssignedClinic || (clientClinicSelect ? clientClinicSelect.value : "Sede General");
       const clientName = document.getElementById("clientName").value.trim();
-      const clientPhone = document.getElementById("clientPhone").value.trim();
+      const rawPhone = document.getElementById("clientPhone").value.trim();
+      
+      const formattedPhone = formatToArgentinaWhatsApp(rawPhone);
+      const cleanDigits = normalizePhone(rawPhone);
+
+      if (cleanDigits.length < 8) {
+        alert("Por favor ingresá un número de teléfono válido (ej: 264 1234567).");
+        return;
+      }
+
       const clientTreatment = document.getElementById("clientTreatment").value;
       const submitBtn = document.getElementById("submitBookingBtn");
 
       submitBtn.disabled = true;
-      submitBtn.textContent = "Guardando turno...";
+      submitBtn.textContent = "Verificando disponibilidad...";
 
       try {
+        let debtorsList = [];
+        try {
+          debtorsList = await db.getAllDebtors();
+        } catch (dErr) {
+          console.warn("Aviso al consultar deudores:", dErr);
+        }
+
+        const inputCleanName = clientName.toLowerCase();
+
+        const debtorMatch = debtorsList.find(d => {
+          const debtorDigits = normalizePhone(d.client_phone);
+          const matchPhone = debtorDigits === cleanDigits;
+          const matchName = d.client_name.toLowerCase() === inputCleanName;
+          return matchPhone || matchName;
+        });
+
+        if (debtorMatch) {
+          alert(`Estimado/a ${clientName}:\n\nSu turno no se pudo agendar correctamente.\n\nPor favor, comuníquese directamente por WhatsApp al +54 9 264 544-7043 para pedir informacion al respecto.`);
+          submitBtn.disabled = false;
+          submitBtn.textContent = "Confirmar Turno";
+          return;
+        }
+
+        submitBtn.textContent = "Guardando turno...";
+
         await db.insertAppointment({
           appointment_date: selectedDateString,
           appointment_time: selectedTimeSlot,
           client_name: clientName,
-          client_phone: clientPhone,
+          client_phone: formattedPhone,
           treatment: `${clientTreatment} (${clientClinic})`,
           status: 'pendiente_sena'
         });
+
+        alert(`✨ ¡Turno Agendado con Éxito!\n\nHola ${clientName}, tu solicitud para el ${selectedDateString} a las ${selectedTimeSlot} hs en "${clientClinic}" fue registrada correctamente.`);
 
         bookingForm.classList.add("hidden");
         
@@ -469,12 +594,12 @@ document.addEventListener("DOMContentLoaded", () => {
         const waLink = `https://wa.me/${WHATSAPP_NUMERO}?text=${waMsg}`;
 
         bookingSuccessMessage.innerHTML = `
-          <div class="p-6 bg-white border border-[#E8DEC8] rounded-2xl text-left space-y-4 shadow-sm">
+          <div class="p-6 bg-white border border-[#E8DEC8] rounded-2xl text-left space-y-4 shadow-sm animate-fade-in">
             <div class="flex items-center gap-3">
-              <div class="w-10 h-10 rounded-full bg-amber-100 text-amber-700 flex items-center justify-center font-bold text-lg">!</div>
+              <div class="w-10 h-10 rounded-full bg-emerald-100 text-emerald-700 flex items-center justify-center font-bold text-lg">✓</div>
               <div>
-                <h5 class="font-serif text-lg font-bold text-stone-900 leading-tight">Turno Pre-reservado</h5>
-                <p class="text-xs text-stone-500">Sede de atención: <strong>${clientClinic}</strong></p>
+                <h5 class="font-serif text-lg font-bold text-stone-900 leading-tight">¡Turno Agendado con Éxito!</h5>
+                <p class="text-xs text-stone-500">Sede: <strong>${clientClinic}</strong> · 📅 ${selectedDateString} (${selectedTimeSlot} hs)</p>
               </div>
             </div>
 
@@ -495,7 +620,7 @@ document.addEventListener("DOMContentLoaded", () => {
             <a href="${waLink}" target="_blank" rel="noopener" class="block text-center w-full py-3 rounded-xl bg-emerald-600 text-white font-medium text-xs tracking-wider uppercase hover:bg-emerald-700 transition shadow">
               Enviar Comprobante por WhatsApp
             </a>
-            <p class="text-[11px] text-stone-400 text-center">Tenés 2 horas para enviar el comprobante antes de que el turno se libere.</p>
+            <p class="text-[11px] text-stone-400 text-center">Tenés 2 horas para enviar el comprobante antes de que el turno se libere[cite: 36].</p>
           </div>
         `;
         bookingSuccessMessage.classList.remove("hidden");
@@ -524,12 +649,13 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   // ============================================================
-  // PANEL DE ADMINISTRACIÓN Y FUNCIONES ESPECIALES
+  // PANEL DE ADMINISTRACIÓN (TURNOS Y CONTROL DE DEUDORES)
   // ============================================================
   function showAdminDashboard() {
     if (adminLoginView) adminLoginView.classList.add("hidden");
     if (adminDashboardView) adminDashboardView.classList.remove("hidden");
     fetchAdminAppointments();
+    fetchDebtorsList();
   }
 
   if (openAdminBtn && adminModal) {
@@ -598,7 +724,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
   async function fetchAdminAppointments() {
     if (!adminAppointmentsList) return;
-    adminAppointmentsList.innerHTML = `<p class="text-xs text-stone-400 py-6 text-center">Cargando base de datos en tiempo real...</p>`;
+    adminAppointmentsList.innerHTML = `<p class="text-xs text-stone-400 py-6 text-center">Cargando base de datos en tiempo real...[cite: 36]</p>`;
 
     let list = [];
     try {
@@ -623,8 +749,10 @@ document.addEventListener("DOMContentLoaded", () => {
       const card = document.createElement("div");
       card.className = "p-4 bg-white rounded-2xl border border-stone-200 shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-4 text-xs transition hover:border-[#A67C52]/40";
       
-      const cleanPhone = app.client_phone ? app.client_phone.replace(/\D/g, '') : '';
-      const waUrl = `https://wa.me/${cleanPhone}?text=${encodeURIComponent(`Hola ${app.client_name}, nos comunicamos de Eternal Plasma Derm respecto a tu turno del ${app.appointment_date} (${app.appointment_time} hs).`)}`;
+      // Enlace de WhatsApp: utiliza formato internacional de celular 549...
+      const rawDigits = normalizePhone(app.client_phone);
+      const waClean = rawDigits ? `549${rawDigits}` : '';
+      const waUrl = `https://wa.me/${waClean}?text=${encodeURIComponent(`Hola ${app.client_name}, me comunico de Eternal Plasma Derm respecto a tu turno del ${app.appointment_date} (${app.appointment_time} hs). Tu lugar ya fue confirmado. ¡Gracias por elegirme!`)}`;
 
       const isPending = app.status === 'pendiente_sena';
       const isBlocked = app.status === 'bloqueado';
@@ -653,7 +781,7 @@ document.addEventListener("DOMContentLoaded", () => {
         </div>
 
         <div class="flex items-center gap-2 flex-wrap sm:flex-nowrap justify-end">
-          ${cleanPhone && cleanPhone !== '-' ? `
+          ${waClean && app.client_phone !== '-' ? `
             <a href="${waUrl}" target="_blank" rel="noopener" class="px-3 py-2 rounded-xl bg-stone-100 hover:bg-stone-200 text-stone-700 font-medium transition flex items-center gap-1.5">
               💬 WhatsApp
             </a>
@@ -721,6 +849,131 @@ document.addEventListener("DOMContentLoaded", () => {
       }
 
       adminAppointmentsList.appendChild(card);
+    });
+  }
+
+  // ============================================================
+  // GESTIÓN DE DEUDORES (CARGA, AGREGADO Y ELIMINACIÓN)
+  // ============================================================
+  if (refreshDebtorsBtn) {
+    refreshDebtorsBtn.addEventListener("click", fetchDebtorsList);
+  }
+
+  async function fetchDebtorsList() {
+    if (!debtorsListContainer) return;
+    debtorsListContainer.innerHTML = `<p class="text-xs text-stone-400 py-6 text-center">Consultando registros de deudores...</p>`;
+
+    let debtors = [];
+    try {
+      debtors = await db.getAllDebtors();
+    } catch (err) {
+      console.error(err);
+      debtorsListContainer.innerHTML = `
+        <div class="p-4 bg-rose-50 border border-rose-200 text-rose-700 text-xs rounded-xl text-center">
+          <strong>No se pudo cargar la tabla de deudores.</strong><br>
+          <span class="text-[11px] opacity-80">Asegurate de haber ejecutado el script SQL para crear la tabla 'debtors' en Supabase.</span>
+        </div>
+      `;
+      return;
+    }
+
+    if (debtorsCountBadge) debtorsCountBadge.textContent = debtors.length;
+
+    if (debtors.length === 0) {
+      debtorsListContainer.innerHTML = `<div class="p-8 text-center text-xs text-stone-400 bg-stone-50 rounded-2xl border border-dashed border-stone-200">No hay pacientes con deuda registrados actualmente.</div>`;
+      return;
+    }
+
+    debtorsListContainer.innerHTML = "";
+    debtors.forEach(debtor => {
+      const card = document.createElement("div");
+      card.className = "p-3.5 bg-white rounded-2xl border border-stone-200 shadow-sm flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs";
+
+      const rawDigits = normalizePhone(debtor.client_phone);
+      const waClean = rawDigits ? `549${rawDigits}` : '';
+      const waUrl = `https://wa.me/${waClean}?text=${encodeURIComponent(`Hola ${debtor.client_name}, te escribimos de Eternal Plasma Derm para coordinar la regularización de tu saldo pendiente (${debtor.debt_amount}).`)}`;
+
+      card.innerHTML = `
+        <div class="space-y-1">
+          <div class="flex items-center gap-2">
+            <span class="font-bold text-stone-900">${debtor.client_name}</span>
+            <span class="px-2 py-0.5 rounded-full bg-rose-100 text-rose-800 font-bold text-[10px] border border-rose-200">
+              Deuda: ${debtor.debt_amount}
+            </span>
+          </div>
+          <div class="text-stone-500 text-[11px] flex flex-wrap gap-x-3">
+            <span>Tel: <strong>${debtor.client_phone}</strong></span>
+            <span>Motivo: <em>${debtor.reason || 'Sin especificar'}</em></span>
+          </div>
+        </div>
+
+        <div class="flex items-center gap-2 justify-end">
+          <a href="${waUrl}" target="_blank" rel="noopener" class="px-3 py-1.5 rounded-xl bg-stone-100 hover:bg-stone-200 text-stone-700 font-medium transition flex items-center gap-1 text-[11px]">
+            💬 WhatsApp
+          </a>
+          <button class="remove-debtor-btn px-3 py-1.5 rounded-xl bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border border-emerald-200 font-semibold transition text-[11px]" data-id="${debtor.id}" data-name="${debtor.client_name}">
+            ✓ Saldo Pagado (Habilitar)
+          </button>
+        </div>
+      `;
+
+      const removeBtn = card.querySelector(".remove-debtor-btn");
+      if (removeBtn) {
+        removeBtn.addEventListener("click", async () => {
+          const id = removeBtn.getAttribute("data-id");
+          const name = removeBtn.getAttribute("data-name");
+
+          if (!confirm(`¿Confirmás que ${name} saldó su cuenta?\n\nAl removerlo de la lista podrá volver a solicitar turnos con normalidad.`)) return;
+
+          removeBtn.disabled = true;
+          removeBtn.textContent = "Actualizando...";
+
+          try {
+            await db.deleteDebtor(id);
+            fetchDebtorsList();
+          } catch (e) {
+            alert("Error al remover deudor: " + e.message);
+            removeBtn.disabled = false;
+            removeBtn.textContent = "✓ Saldo Pagado (Habilitar)";
+          }
+        });
+      }
+
+      debtorsListContainer.appendChild(card);
+    });
+  }
+
+  // Registrar nuevo deudor
+  if (addDebtorForm) {
+    addDebtorForm.addEventListener("submit", async (e) => {
+      e.preventDefault();
+
+      const name = document.getElementById("debtorName").value.trim();
+      const rawPhone = document.getElementById("debtorPhone").value.trim();
+      const formattedPhone = formatToArgentinaWhatsApp(rawPhone);
+      const amount = document.getElementById("debtorAmount").value.trim();
+      const reason = document.getElementById("debtorReason").value.trim();
+      const btn = document.getElementById("addDebtorBtn");
+
+      btn.disabled = true;
+      btn.textContent = "Guardando en lista negra...";
+
+      try {
+        await db.insertDebtor({
+          client_name: name,
+          client_phone: formattedPhone,
+          debt_amount: amount,
+          reason: reason || "Turno previo no cancelado"
+        });
+
+        addDebtorForm.reset();
+        fetchDebtorsList();
+      } catch (err) {
+        alert("Error al guardar deudor: " + err.message);
+      } finally {
+        btn.disabled = false;
+        btn.textContent = "+ Registrar en Lista de Deudores";
+      }
     });
   }
 
