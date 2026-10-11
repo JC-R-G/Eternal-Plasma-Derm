@@ -6,14 +6,12 @@ const SUPABASE_URL = "https://izmumxhupaybploxfbft.supabase.co";
 const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Iml6bXVteGh1cGF5YnBsb3hmYmZ0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTEwMzE3ODMsImV4cCI6MjEwNjYwNzc4M30.sHPpcPs1J6OFjnosRLynWQe3sBZlvqS26t-x3Dn5bVM";
 const ADMIN_PASSWORD = "eternaladmin2026";
 
-// DATOS DE MERCADO PAGO Y CONTACTO (Teléfono celular con 549 para WhatsApp)
+// DATOS DE MERCADO PAGO Y CONTACTO
 const MP_ALIAS = "patogil.mp";
 const SENA_VALOR = "$20.000";
 const WHATSAPP_NUMERO = "5492645447043";
 
-// ============================================================
-// HORARIOS PERSONALIZADOS PARA CADA DÍA Y CLÍNICA
-// ============================================================
+// HORARIOS POR CADA SEDE
 const HORARIOS_POR_SEDE = {
   "Capital - Clínica RENACER": [
     "16:00", "17:15", "18:30", "19:45"
@@ -45,29 +43,17 @@ const getHeaders = (extraHeaders = {}) => ({
 
 let isAdminLogged = sessionStorage.getItem("eternal_admin_auth") === "true";
 
-// Helper: Formatea cualquier número argentino a +54 9 ... para WhatsApp y BD
 function formatToArgentinaWhatsApp(inputStr) {
   let cleaned = String(inputStr || '').replace(/\D/g, '');
 
-  if (cleaned.startsWith('549')) {
-    cleaned = cleaned.slice(3);
-  } else if (cleaned.startsWith('54')) {
-    cleaned = cleaned.slice(2);
-  }
+  if (cleaned.startsWith('549')) cleaned = cleaned.slice(3);
+  else if (cleaned.startsWith('54')) cleaned = cleaned.slice(2);
+  if (cleaned.startsWith('0')) cleaned = cleaned.slice(1);
+  if (cleaned.startsWith('26415')) cleaned = '264' + cleaned.slice(5);
 
-  if (cleaned.startsWith('0')) {
-    cleaned = cleaned.slice(1);
-  }
-
-  if (cleaned.startsWith('26415')) {
-    cleaned = '264' + cleaned.slice(5);
-  }
-
-  // Guarda y formatea internamente con +54 9 para compatibilidad celular argentina
   return `+54 9 ${cleaned}`;
 }
 
-// Helper: Extrae solo dígitos sin prefijos para comparaciones
 function normalizePhone(str) {
   let digits = String(str || '').replace(/\D/g, '');
   if (digits.startsWith('549')) digits = digits.slice(3);
@@ -77,45 +63,31 @@ function normalizePhone(str) {
   return digits;
 }
 
-// Helper: Determina si una fecha está permitida y a qué clínica corresponde
 function getClinicScheduleForDate(dateObj) {
   const dayOfWeek = dateObj.getDay();
   const dayOfMonth = dateObj.getDate();
   const occurrence = Math.ceil(dayOfMonth / 7);
 
-  if (dayOfWeek === 1) {
-    return { allowed: true, clinic: "Capital - Clínica RENACER" };
-  }
-  if (dayOfWeek === 3) {
-    return { allowed: true, clinic: "Pocito - Instituto de la Salud" };
-  }
+  if (dayOfWeek === 1) return { allowed: true, clinic: "Capital - Clínica RENACER" };
+  if (dayOfWeek === 3) return { allowed: true, clinic: "Pocito - Instituto de la Salud" };
   if (dayOfWeek === 4) {
-    if (occurrence === 2) {
-      return { allowed: true, clinic: "Jáchal - Clínica Eli Pa Ce" };
-    }
+    if (occurrence === 2) return { allowed: true, clinic: "Jáchal - Clínica Eli Pa Ce" };
     return { allowed: false, clinic: null };
   }
   if (dayOfWeek === 5) {
-    if (occurrence === 1) {
-      return { allowed: true, clinic: "Valle Fértil - S.I.M.A" };
-    } else if (occurrence === 2) {
-      return { allowed: true, clinic: "Rodeo - Clínica Santo Domingo" };
-    }
+    if (occurrence === 1) return { allowed: true, clinic: "Valle Fértil - S.I.M.A" };
+    if (occurrence === 2) return { allowed: true, clinic: "Rodeo - Clínica Santo Domingo" };
     return { allowed: false, clinic: null };
   }
   if (dayOfWeek === 6) {
-    if (occurrence === 1) {
-      return { allowed: true, clinic: "Valle Fértil - S.I.M.A" };
-    } else if (occurrence === 2) {
-      return { allowed: true, clinic: "Calingasta - CEKYM" };
-    }
+    if (occurrence === 1) return { allowed: true, clinic: "Valle Fértil - S.I.M.A" };
+    if (occurrence === 2) return { allowed: true, clinic: "Calingasta - CEKYM" };
     return { allowed: false, clinic: null };
   }
 
   return { allowed: false, clinic: null };
 }
 
-// Métodos de base de datos para citas y deudores
 const db = {
   async getBookedRecords(dateStr) {
     const res = await fetch(`${SUPABASE_URL}/rest/v1/appointments?appointment_date=eq.${dateStr}&select=*`, {
@@ -151,9 +123,7 @@ const db = {
   async updateStatus(id, newStatus) {
     const res = await fetch(`${SUPABASE_URL}/rest/v1/appointments?id=eq.${id}`, {
       method: "PATCH",
-      headers: getHeaders({
-        "Content-Type": "application/json"
-      }),
+      headers: getHeaders({ "Content-Type": "application/json" }),
       body: JSON.stringify({ status: newStatus })
     });
     if (!res.ok) throw new Error(await res.text());
@@ -226,7 +196,6 @@ document.addEventListener("DOMContentLoaded", () => {
   const bookingSuccessMessage = document.getElementById("bookingSuccessMessage");
   const clientClinicSelect = document.getElementById("clientClinic");
 
-  // Elementos Admin
   const adminTopBar = document.getElementById("adminTopBar");
   const lockIconDefault = document.getElementById("lockIconDefault");
   const lockIconLogged = document.getElementById("lockIconLogged");
@@ -250,7 +219,6 @@ document.addEventListener("DOMContentLoaded", () => {
   const adminStatusFilter = document.getElementById("adminStatusFilter");
   const refreshAdminBtn = document.getElementById("refreshAdminBtn");
 
-  // Elementos Pestañas Admin y Deudores
   const tabTurnosBtn = document.getElementById("tabTurnosBtn");
   const tabDeudoresBtn = document.getElementById("tabDeudoresBtn");
   const tabTurnosContent = document.getElementById("tabTurnosContent");
@@ -276,7 +244,6 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   }
 
-  // Switch de Pestañas en Admin
   if (tabTurnosBtn && tabDeudoresBtn) {
     tabTurnosBtn.addEventListener("click", () => {
       tabTurnosBtn.className = "pb-2.5 border-b-2 border-[#A67C52] text-[#A67C52] font-bold transition";
@@ -522,7 +489,7 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   // ============================================================
-  // RESERVA DE TURNO (CON VALIDACIÓN DE PREFIJO +54 Y DEUDA)
+  // CONFIRMACIÓN DE TURNO CON COPIADO AUTOMÁTICO DE ALIAS
   // ============================================================
   if (bookingForm) {
     bookingForm.addEventListener("submit", async (e) => {
@@ -569,7 +536,7 @@ document.addEventListener("DOMContentLoaded", () => {
         });
 
         if (debtorMatch) {
-          alert(`Estimado/a ${clientName}:\n\nSu turno no se pudo agendar correctamente.\n\nPor favor, comuníquese directamente por WhatsApp al +54 9 264 544-7043 para pedir informacion al respecto.`);
+          alert(`Estimado/a ${clientName}:\n\nSu turno no se pudo agendar correctamente.\n\nPor favor, comuníquese directamente por WhatsApp al +54 9 264 544-7043 para pedir información.`);
           submitBtn.disabled = false;
           submitBtn.textContent = "Confirmar Turno";
           return;
@@ -586,7 +553,22 @@ document.addEventListener("DOMContentLoaded", () => {
           status: 'pendiente_sena'
         });
 
-        alert(`✨ ¡Turno Agendado con Éxito!\n\nHola ${clientName}, tu solicitud para el ${selectedDateString} a las ${selectedTimeSlot} hs en "${clientClinic}" fue registrada correctamente.`);
+        // Copia automática del alias al portapapeles
+        let aliasCopiado = false;
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+          try {
+            await navigator.clipboard.writeText(MP_ALIAS);
+            aliasCopiado = true;
+          } catch (clipErr) {
+            console.warn("No se pudo copiar automáticamente:", clipErr);
+          }
+        }
+
+        const textoCopia = aliasCopiado 
+          ? `\n\n📋 ¡El Alias (${MP_ALIAS}) fue copiado a tu portapapeles para transferir la seña!`
+          : "";
+
+        alert(`✨ ¡Turno Agendado con Éxito!\n\nHola ${clientName}, tu solicitud para el ${selectedDateString} a las ${selectedTimeSlot} hs en "${clientClinic}" fue registrada correctamente.${textoCopia}`);
 
         bookingForm.classList.add("hidden");
         
@@ -603,7 +585,7 @@ document.addEventListener("DOMContentLoaded", () => {
               </div>
             </div>
 
-            <div class="p-4 bg-stone-50 rounded-xl border border-stone-200 space-y-2 text-xs">
+            <div class="p-4 bg-stone-50 rounded-xl border border-stone-200 space-y-2.5 text-xs">
               <div class="flex justify-between items-center">
                 <span class="text-stone-500">Monto de la seña:</span>
                 <span class="font-bold text-stone-900 text-sm">${SENA_VALOR}</span>
@@ -612,14 +594,21 @@ document.addEventListener("DOMContentLoaded", () => {
                 <span class="text-stone-500">Alias Mercado Pago:</span>
                 <span id="copyAliasTarget" class="font-mono font-bold text-[#A67C52] bg-white px-2 py-0.5 rounded border border-stone-200">${MP_ALIAS}</span>
               </div>
-              <button type="button" id="copyAliasBtn" class="w-full text-center text-[11px] text-[#A67C52] font-semibold hover:underline mt-1">
-                📋 Copiar Alias
+              <button type="button" id="copyAliasBtn" class="w-full text-center text-[11px] text-[#A67C52] font-semibold hover:underline">
+                ${aliasCopiado ? '✅ ¡Alias copiado al portapapeles!' : '📋 Copiar Alias'}
               </button>
             </div>
 
-            <a href="${waLink}" target="_blank" rel="noopener" class="block text-center w-full py-3 rounded-xl bg-emerald-600 text-white font-medium text-xs tracking-wider uppercase hover:bg-emerald-700 transition shadow">
-              Enviar Comprobante por WhatsApp
-            </a>
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5 pt-1">
+              <a href="mercadopago://" class="block text-center w-full py-3 rounded-xl bg-[#009EE3] text-white font-medium text-xs tracking-wider uppercase hover:bg-[#0081BA] transition shadow">
+                Abrir Mercado Pago
+              </a>
+
+              <a href="${waLink}" target="_blank" rel="noopener" class="block text-center w-full py-3 rounded-xl bg-emerald-600 text-white font-medium text-xs tracking-wider uppercase hover:bg-emerald-700 transition shadow">
+                Enviar Comprobante
+              </a>
+            </div>
+
             <p class="text-[11px] text-stone-400 text-center">Tenés 2 horas para enviar el comprobante antes de que el turno se libere.</p>
           </div>
         `;
@@ -649,7 +638,7 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   // ============================================================
-  // PANEL DE ADMINISTRACIÓN (TURNOS Y CONTROL DE DEUDORES)
+  // PANEL DE ADMINISTRACIÓN (TURNOS Y DEUDORES)
   // ============================================================
   function showAdminDashboard() {
     if (adminLoginView) adminLoginView.classList.add("hidden");
@@ -692,9 +681,7 @@ document.addEventListener("DOMContentLoaded", () => {
         if (adminLoginError) adminLoginError.classList.add("hidden");
         syncAdminUI();
         showAdminDashboard();
-        if (selectedDateString) {
-          loadAvailableSlots(selectedDateString);
-        }
+        if (selectedDateString) loadAvailableSlots(selectedDateString);
       } else {
         if (adminLoginError) adminLoginError.classList.remove("hidden");
       }
@@ -707,9 +694,7 @@ document.addEventListener("DOMContentLoaded", () => {
       sessionStorage.removeItem("eternal_admin_auth");
       syncAdminUI();
       if (adminModal) adminModal.classList.add("hidden");
-      if (selectedDateString) {
-        loadAvailableSlots(selectedDateString);
-      }
+      if (selectedDateString) loadAvailableSlots(selectedDateString);
       alert("Sesión de administrador cerrada correctamente.");
     });
   }
@@ -749,7 +734,6 @@ document.addEventListener("DOMContentLoaded", () => {
       const card = document.createElement("div");
       card.className = "p-4 bg-white rounded-2xl border border-stone-200 shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-4 text-xs transition hover:border-[#A67C52]/40";
       
-      // Enlace de WhatsApp: utiliza formato internacional de celular 549...
       const rawDigits = normalizePhone(app.client_phone);
       const waClean = rawDigits ? `549${rawDigits}` : '';
       const waUrl = `https://wa.me/${waClean}?text=${encodeURIComponent(`Hola ${app.client_name}, me comunico de Eternal Plasma Derm respecto a tu turno del ${app.appointment_date} (${app.appointment_time} hs). Tu lugar ya fue confirmado. ¡Gracias por elegirme!`)}`;
@@ -852,9 +836,6 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 
-  // ============================================================
-  // GESTIÓN DE DEUDORES (CARGA, AGREGADO Y ELIMINACIÓN)
-  // ============================================================
   if (refreshDebtorsBtn) {
     refreshDebtorsBtn.addEventListener("click", fetchDebtorsList);
   }
@@ -943,7 +924,6 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 
-  // Registrar nuevo deudor
   if (addDebtorForm) {
     addDebtorForm.addEventListener("submit", async (e) => {
       e.preventDefault();
