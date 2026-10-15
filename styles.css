@@ -3,28 +3,28 @@
    ============================================================ */
 
 :root {
-  --color-bg-light: #FAF8F5;
-  --color-sand: #EFE9DF;
-  --color-gold: #A67C52;
-  --color-gold-hover: #8F663E;
-  --color-text-main: #2D2A26;
-  --color-text-muted: #6B6661;
+  --color-bg-light: #faf8f5;
+  --color-sand: #efe9df;
+  --color-gold: #a67c52;
+  --color-gold-hover: #8f663e;
+  --color-text-main: #2d2a26;
+  --color-text-muted: #6b6661;
 }
 
 body {
-  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-family: "Plus Jakarta Sans", sans-serif;
   background-color: var(--color-bg-light);
   color: var(--color-text-main);
 }
 
 .font-serif {
-  font-family: 'Cormorant Garamond', Georgia, serif;
+  font-family: "Cormorant Garamond", Georgia, serif;
 }
 
 /* Botones principales con tono champán / arena dorada */
 .btn-primary {
   background-color: var(--color-gold);
-  color: #FFFFFF;
+  color: #ffffff;
   transition: all 0.25s ease-in-out;
 }
 
@@ -36,7 +36,7 @@ body {
 
 /* Tarjetas de tratamientos */
 .card {
-  background: #FFFFFF;
+  background: #ffffff;
   border: 1px solid rgba(220, 214, 204, 0.6);
   transition: all 0.3s ease;
 }
@@ -49,36 +49,42 @@ body {
 
 /* Estilos de botones de horarios */
 .slot-available {
-  border: 1px solid #D5CEBF;
-  background-color: #FFFFFF;
-  color: #3F3C38;
+  border: 1px solid #d5cebf;
+  background-color: #ffffff;
+  color: #3f3c38;
   transition: all 0.2s ease;
 }
 
 .slot-available:hover {
   border-color: var(--color-gold);
-  background-color: #F8F5EE;
+  background-color: #f8f5ee;
   color: var(--color-gold);
 }
 
 .slot-selected {
   border-color: var(--color-gold) !important;
   background-color: var(--color-gold) !important;
-  color: #FFFFFF !important;
+  color: #ffffff !important;
 }
 
 .slot-occupied {
-  border: 1px solid #E5E7EB;
-  background-color: #F3F4F6;
-  color: #9CA3AF;
+  border: 1px solid #e5e7eb;
+  background-color: #f3f4f6;
+  color: #9ca3af;
   cursor: not-allowed;
   opacity: 0.7;
 }
 
 /* Animación sutil de entrada para modales */
 @keyframes fadeIn {
-  from { opacity: 0; transform: scale(0.98); }
-  to { opacity: 1; transform: scale(1); }
+  from {
+    opacity: 0;
+    transform: scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
 }
 
 #adminModal > div {
