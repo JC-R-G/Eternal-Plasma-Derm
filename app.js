@@ -590,7 +590,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         }
 
         const textoCopia = aliasCopiado 
-          ? `\n\n📋 ¡El Alias (${MP_ALIAS}) fue copiado a tu portapapeles para transferir la seña!`
+          ? `\n\n📋 ¡El Alias (${MP_ALIAS}) fue copiado a tu portapapeles para transferir la seña mínima de $15.000 (Por Favor compartir comprobante)!`
           : "";
 
         alert(`✨ ¡Turno Agendado con Éxito!\n\nHola ${clientName}, tu solicitud para el ${selectedDateString} a las ${selectedTimeSlot} hs en "${clientClinic}" fue registrada correctamente.${textoCopia}`);
