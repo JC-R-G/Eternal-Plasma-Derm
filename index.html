@@ -452,12 +452,17 @@
   <!-- SECCIÓN TURNOS (CALENDARIO Y FORMULARIO) -->
   <section id="turnos" class="py-20 bg-white">
     <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
-      <div class="text-center max-w-xl mx-auto mb-14">
+      <div class="text-center max-w-xl mx-auto mb-12">
         <span class="text-xs uppercase tracking-[0.25em] text-[#A67C52] font-semibold">Reserva tu momento</span>
         <h2 class="font-serif text-3xl sm:text-4xl text-stone-900 mt-2">Agenda tu Turno</h2>
         <p class="text-sm text-stone-600 mt-3 font-light">
           Seleccioná un día del calendario según el cronograma de cada sede para ver los horarios disponibles.
         </p>
+
+        <!-- Aclaración destacada de las 12 horas -->
+        <div class="mt-5 inline-block p-3.5 sm:px-6 rounded-2xl bg-amber-50/80 border border-amber-200/90 text-amber-900 text-xs shadow-sm">
+          <span class="font-semibold text-[#A67C52]">⏳ Aclaración importante:</span> Debes señar el turno dentro de las primeras <strong>12 horas</strong> luego de confirmar la reserva; de lo contrario, el turno será liberado automáticamente.
+        </div>
       </div>
 
       <div class="bg-[#FAF8F5] rounded-3xl p-6 sm:p-10 shadow-sm border border-stone-200/80 grid grid-cols-1 lg:grid-cols-12 gap-8 relative">
@@ -575,7 +580,7 @@
     </div>
   </section>
 
-  <!-- SECCIÓN CONTACTO Y SOBRE MÍ -->
+  <!-- SECCIÓN CONTACTO Y SOBRE MÍ (CON DIPLOMAS Y CERTIFICACIONES EXPANDIBLES) -->
   <section id="contacto" class="py-20 bg-[#FAF8F5] border-t border-stone-200/70">
     <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
       
@@ -585,8 +590,8 @@
         <div class="h-0.5 w-12 bg-[#A67C52] mx-auto mt-4"></div>
       </div>
 
-      <div class="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
-        <div class="lg:col-span-5 flex justify-center">
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-12 items-start">
+        <div class="lg:col-span-5 flex justify-center sticky top-28">
           <div class="relative w-full max-w-sm">
             <div class="absolute -inset-2 rounded-3xl bg-gradient-to-tr from-[#A67C52]/30 to-[#EFE9DF] blur-md -z-10"></div>
             <div class="w-full aspect-[4/5] rounded-3xl overflow-hidden shadow-lg border border-stone-200 bg-white flex items-center justify-center">
@@ -597,15 +602,16 @@
           </div>
         </div>
 
-        <div class="lg:col-span-7 space-y-6">
+        <div class="lg:col-span-7 space-y-8">
           <div>
-            <span class="text-xs font-semibold uppercase tracking-wider text-[#A67C52]">Especialista en Plasma Rico en Plaquetas (PRP) & Cosmiatría</span>
+            <span class="text-xs font-semibold uppercase tracking-wider text-[#A67C52]">Plasma Rico en Plaquetas (PRP), Cosmetología & Cosmiatría</span>
             <h3 class="font-serif text-3xl sm:text-4xl text-stone-900 mt-1">Patricia Gil</h3>
             <p class="text-sm text-stone-600 mt-3 leading-relaxed font-light">
               Apasionada por la salud y regeneración celular de la piel. Mi objetivo es brindarte resultados visibles y naturales a través de medicina estética no invasiva y regenerativa, con un trato cercano, seguro y protocolos estériles en cada sesión.
             </p>
           </div>
 
+          <!-- RESUMEN CURRICULAR -->
           <div class="p-6 bg-white rounded-2xl border border-stone-200/80 space-y-4">
             <h4 class="font-serif text-lg font-bold text-stone-900 flex items-center gap-2">
               <span class="text-[#A67C52]">✦</span> Formación y Certificaciones
@@ -613,20 +619,147 @@
             <ul class="space-y-2.5 text-xs text-stone-600">
               <li class="flex items-start gap-2.5">
                 <span class="text-[#A67C52] font-bold">✓</span>
-                <span><strong>Especialización en Plasma Rico en Plaquetas (PRP):</strong> Extracción, centrifugado clínico, activación y bioestimulación con Dermapen facial, capilar y corporal.</span>
+                <span><strong>Auxiliar de Bioquímica:</strong> Formación en laboratorio clínico y manipulación segura de muestras biológicas (Mat. 840).</span>
               </li>
               <li class="flex items-start gap-2.5">
                 <span class="text-[#A67C52] font-bold">✓</span>
-                <span><strong>Certificación en Bioseguridad Hospitalaria y Asepsia:</strong> Protocolos clínicos rigurosos y material 100% descartable.</span>
+                <span><strong>Certificación en Plasma Rico en Plaquetas (PRP):</strong> Extracción, centrifugado clínico, activación y bioestimulación con Dermapen facial, capilar y corporal.</span>
               </li>
               <li class="flex items-start gap-2.5">
                 <span class="text-[#A67C52] font-bold">✓</span>
-                <span><strong>Cosmetología & Cosmiatría Clínica:</strong> Tratamiento avanzado de fotoenvejecimiento, flacidez y regeneración celular.</span>
+                <span><strong>Técnica Especializada en Microneedling:</strong> Inducción percutánea de colágeno y rejuvenecimiento epidérmico.</span>
+              </li>
+              <li class="flex items-start gap-2.5">
+                <span class="text-[#A67C52] font-bold">✓</span>
+                <span><strong>Extraccionista de Laboratorio:</strong> Práctica profesional en punción venosa y bioseguridad.</span>
+              </li>
+              <li class="flex items-start gap-2.5">
+                <span class="text-[#A67C52] font-bold">✓</span>
+                <span><strong>Seguro de Mala Praxis y Responsabilidad Civil Médica:</strong> Cobertura profesional de Swiss Medical Seguros.</span>
               </li>
             </ul>
           </div>
 
-          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2">
+          <!-- GALERÍA DE CERTIFICADOS CON AUXILIAR DE BIOQUÍMICA EN POSICIÓN 1 -->
+          <div class="space-y-4 pt-2">
+            <div class="flex items-center justify-between pb-2 border-b border-stone-200">
+              <h4 class="font-serif text-xl font-bold text-stone-900 flex items-center gap-2">
+                <span class="text-[#A67C52]">📜</span> Certificaciones & Diplomas Oficiales
+              </h4>
+              <span class="text-[11px] text-stone-400 font-medium">Hacé clic para ampliar</span>
+            </div>
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              
+              <!-- 1. Auxiliar de Bioquímica (Ministerio de Educación) [Fila 1 - Izquierda] -->
+              <div class="certificate-card group bg-white p-3.5 rounded-2xl border border-stone-200 shadow-sm flex flex-col justify-between transition hover:border-[#A67C52]/60 hover:shadow-md cursor-pointer"
+                   data-title="1. Auxiliar de Bioquímica (Ministerio de Educación)"
+                   data-src="auxiliarbioquimica.jpg"
+                   data-rotate="90">
+                <span class="text-xs font-bold text-stone-900 mb-2.5 block leading-tight">
+                  1. Auxiliar de Bioquímica (Ministerio de Educación)
+                </span>
+                <div class="relative w-full aspect-[4/3] rounded-xl overflow-hidden bg-stone-50 border border-stone-200 flex items-center justify-center">
+                  <img src="auxiliarbioquimica.jpg" alt="Certificado Auxiliar de Bioquímica" 
+                       class="w-full h-full object-contain p-1 rotate-90 scale-90 transition duration-300 group-hover:scale-95">
+                  <div class="absolute inset-0 bg-black/30 opacity-0 group-hover:opacity-100 flex items-center justify-center transition text-white text-xs font-medium gap-1.5 backdrop-blur-[1px]">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM10 7v3m0 0v3m0-3h3m-3 0H7"/></svg>
+                    <span>Ver en detalle</span>
+                  </div>
+                </div>
+              </div>
+
+              <!-- 2. Curso de Plasma Rico en Plaquetas (PRP) [Fila 1 - Derecha] -->
+              <div class="certificate-card group bg-white p-3.5 rounded-2xl border border-stone-200 shadow-sm flex flex-col justify-between transition hover:border-[#A67C52]/60 hover:shadow-md cursor-pointer"
+                   data-title="2. Curso de Plasma Rico en Plaquetas (PRP)"
+                   data-src="PRP.jpg">
+                <span class="text-xs font-bold text-stone-900 mb-2.5 block leading-tight">
+                  2. Curso de Plasma Rico en Plaquetas (PRP)
+                </span>
+                <div class="relative w-full aspect-[4/3] rounded-xl overflow-hidden bg-stone-50 border border-stone-200 flex items-center justify-center">
+                  <img src="PRP.jpg" alt="Certificado Plasma Rico en Plaquetas" 
+                       class="w-full h-full object-contain p-1 transition duration-300 group-hover:scale-105">
+                  <div class="absolute inset-0 bg-black/30 opacity-0 group-hover:opacity-100 flex items-center justify-center transition text-white text-xs font-medium gap-1.5 backdrop-blur-[1px]">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM10 7v3m0 0v3m0-3h3m-3 0H7"/></svg>
+                    <span>Ver en detalle</span>
+                  </div>
+                </div>
+              </div>
+
+              <!-- 3. Taller de Microneedling & Dermapen [Fila 2 - Izquierda] -->
+              <div class="certificate-card group bg-white p-3.5 rounded-2xl border border-stone-200 shadow-sm flex flex-col justify-between transition hover:border-[#A67C52]/60 hover:shadow-md cursor-pointer"
+                   data-title="3. Taller de Microneedling & Dermapen"
+                   data-src="microneedling.jpg"
+                   data-rotate="90">
+                <span class="text-xs font-bold text-stone-900 mb-2.5 block leading-tight">
+                  3. Taller de Microneedling & Dermapen
+                </span>
+                <div class="relative w-full aspect-[4/3] rounded-xl overflow-hidden bg-stone-50 border border-stone-200 flex items-center justify-center">
+                  <img src="microneedling.jpg" alt="Certificado Microneedling" 
+                       class="w-full h-full object-contain p-1 rotate-90 scale-90 transition duration-300 group-hover:scale-95">
+                  <div class="absolute inset-0 bg-black/30 opacity-0 group-hover:opacity-100 flex items-center justify-center transition text-white text-xs font-medium gap-1.5 backdrop-blur-[1px]">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM10 7v3m0 0v3m0-3h3m-3 0H7"/></svg>
+                    <span>Ver en detalle</span>
+                  </div>
+                </div>
+              </div>
+
+              <!-- 4. Extraccionista con Conocimientos de Laboratorio [Fila 2 - Derecha] -->
+              <div class="certificate-card group bg-white p-3.5 rounded-2xl border border-stone-200 shadow-sm flex flex-col justify-between transition hover:border-[#A67C52]/60 hover:shadow-md cursor-pointer"
+                   data-title="4. Extraccionista con Conocimientos de Laboratorio"
+                   data-src="extraccionista.jpg">
+                <span class="text-xs font-bold text-stone-900 mb-2.5 block leading-tight">
+                  4. Extraccionista con Conocimientos de Laboratorio
+                </span>
+                <div class="relative w-full aspect-[4/3] rounded-xl overflow-hidden bg-stone-50 border border-stone-200 flex items-center justify-center">
+                  <img src="extraccionista.jpg" alt="Certificado Extraccionista" 
+                       class="w-full h-full object-contain p-1 transition duration-300 group-hover:scale-105">
+                  <div class="absolute inset-0 bg-black/30 opacity-0 group-hover:opacity-100 flex items-center justify-center transition text-white text-xs font-medium gap-1.5 backdrop-blur-[1px]">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM10 7v3m0 0v3m0-3h3m-3 0H7"/></svg>
+                    <span>Ver en detalle</span>
+                  </div>
+                </div>
+              </div>
+
+              <!-- 5. Matrícula Profesional Nº 840 (Ministerio de Salud) [Fila 3 - Izquierda] -->
+              <div class="certificate-card group bg-white p-3.5 rounded-2xl border border-stone-200 shadow-sm flex flex-col justify-between transition hover:border-[#A67C52]/60 hover:shadow-md cursor-pointer"
+                   data-title="5. Matrícula Profesional Nº 840 (Ministerio de Salud)"
+                   data-src="carnet.jpg">
+                <span class="text-xs font-bold text-stone-900 mb-2.5 block leading-tight">
+                  5. Matrícula Profesional Nº 840 (Ministerio de Salud)
+                </span>
+                <div class="relative w-full aspect-[4/3] rounded-xl overflow-hidden bg-stone-50 border border-stone-200 flex items-center justify-center">
+                  <img src="carnet.jpg" alt="Carnet Matrícula Profesional" 
+                       class="w-full h-full object-contain p-1 transition duration-300 group-hover:scale-105">
+                  <div class="absolute inset-0 bg-black/30 opacity-0 group-hover:opacity-100 flex items-center justify-center transition text-white text-xs font-medium gap-1.5 backdrop-blur-[1px]">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM10 7v3m0 0v3m0-3h3m-3 0H7"/></svg>
+                    <span>Ver en detalle</span>
+                  </div>
+                </div>
+              </div>
+
+              <!-- 6. Seguro de Responsabilidad Civil Médica (Swiss Medical) [Fila 3 - Derecha] -->
+              <div class="certificate-card group bg-white p-3.5 rounded-2xl border border-stone-200 shadow-sm flex flex-col justify-between transition hover:border-[#A67C52]/60 hover:shadow-md cursor-pointer"
+                   data-title="6. Seguro de Responsabilidad Civil Médica (Swiss Medical)"
+                   data-src="cobertura.jpg">
+                <span class="text-xs font-bold text-stone-900 mb-2.5 block leading-tight">
+                  6. Seguro de Responsabilidad Civil Médica (Swiss Medical)
+                </span>
+                <div class="relative w-full aspect-[4/3] rounded-xl overflow-hidden bg-stone-50 border border-stone-200 flex items-center justify-center">
+                  <img src="cobertura.jpg" alt="Certificado Cobertura Médica" 
+                       class="w-full h-full object-contain p-1 transition duration-300 group-hover:scale-105">
+                  <div class="absolute inset-0 bg-black/30 opacity-0 group-hover:opacity-100 flex items-center justify-center transition text-white text-xs font-medium gap-1.5 backdrop-blur-[1px]">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM10 7v3m0 0v3m0-3h3m-3 0H7"/></svg>
+                    <span>Ver en detalle</span>
+                  </div>
+                </div>
+              </div>
+
+            </div>
+          </div>
+
+          <!-- BOTONES DE CONTACTO DIRECTO (WHATSAPP E INSTAGRAM) -->
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-4 border-t border-stone-200">
             <a href="https://wa.me/5492645447043" target="_blank" rel="noopener" 
                class="flex items-center gap-3.5 p-4 rounded-2xl border border-emerald-200 bg-emerald-50/60 hover:bg-emerald-100/70 transition">
               <div class="w-10 h-10 rounded-xl bg-emerald-600 text-white flex items-center justify-center font-bold text-lg">
@@ -659,6 +792,25 @@
       </div>
     </div>
   </section>
+
+  <!-- MODAL DE VISOR DE CERTIFICADOS (LIGHTBOX EXPANDIDO) -->
+  <div id="certificateModal" class="fixed inset-0 bg-stone-950/85 backdrop-blur-md z-50 hidden flex items-center justify-center p-4">
+    <div class="relative max-w-4xl w-full max-h-[92vh] flex flex-col items-center">
+      
+      <!-- Barra superior del visor -->
+      <div class="w-full flex items-center justify-between pb-3 text-white px-2">
+        <h5 id="modalCertificateTitle" class="font-serif text-lg sm:text-xl font-bold truncate pr-4 text-amber-100"></h5>
+        <button id="closeCertificateModalBtn" class="text-stone-300 hover:text-white text-3xl font-light leading-none p-1 transition">&times;</button>
+      </div>
+
+      <!-- Contenedor de imagen expandida -->
+      <div class="w-full flex items-center justify-center overflow-hidden rounded-2xl bg-black/40 border border-white/10 shadow-2xl p-2">
+        <img id="modalCertificateImg" src="" alt="Certificado ampliado" class="max-h-[78vh] w-auto max-w-full object-contain rounded-xl shadow-lg">
+      </div>
+
+      <p class="text-stone-400 text-xs mt-3 select-none">Hacé clic afuera o presioná la cruz para cerrar</p>
+    </div>
+  </div>
 
   <!-- MODAL ADMIN CON PESTAÑAS (TURNOS + DEUDORES) -->
   <div id="adminModal" class="fixed inset-0 bg-stone-900/60 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
@@ -741,7 +893,6 @@
               <input type="text" id="debtorName" placeholder="Nombre completo *" required 
                      class="px-3 py-2 rounded-xl border border-stone-300 bg-white focus:outline-none focus:border-[#A67C52]">
               
-              <!-- Input teléfono en deudor con prefijo visual +54 -->
               <div class="flex items-center rounded-xl border border-stone-300 bg-white overflow-hidden focus-within:border-[#A67C52]">
                 <span class="px-2.5 py-2 bg-stone-100 text-stone-600 font-semibold text-[11px] border-r border-stone-300 select-none">
                   +54

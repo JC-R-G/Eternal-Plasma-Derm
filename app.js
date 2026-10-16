@@ -26,7 +26,7 @@ const HORARIOS_POR_SEDE = {
     "10:00", "11:00", "12:00", "13:00", "14:00", "15:00", "16:00", "17:00", "18:00", "19:00", "20:00"
   ],
   "Rodeo - Clínica Santo Domingo": [
-    "09:00","10:00", "11:00", "12:00", "13:00", "14:00", "15:00", "16:00", "17:00", "18:00", "19:00", "20:00"
+    "09:00", "10:00", "11:00", "12:00", "13:00", "14:00", "15:00", "16:00", "17:00", "18:00", "19:00", "20:00"
   ],
   "Calingasta - CEKYM": [
     "14:00", "15:00", "16:00", "17:00", "18:00", "19:00", "20:00"
@@ -168,9 +168,7 @@ const db = {
   }
 };
 
-// ============================================================
 // LIMPIEZA AUTOMÁTICA DE TURNOS PENDIENTES CON MÁS DE 12 HORAS
-// ============================================================
 async function cleanupExpiredAppointments() {
   try {
     const all = await db.getAllAppointments();
@@ -250,6 +248,58 @@ document.addEventListener("DOMContentLoaded", async () => {
   const debtorsListContainer = document.getElementById("debtorsListContainer");
   const refreshDebtorsBtn = document.getElementById("refreshDebtorsBtn");
 
+  // Elementos del Visor de Certificados (Lightbox)
+  const certificateModal = document.getElementById("certificateModal");
+  const modalCertificateImg = document.getElementById("modalCertificateImg");
+  const modalCertificateTitle = document.getElementById("modalCertificateTitle");
+  const closeCertificateModalBtn = document.getElementById("closeCertificateModalBtn");
+
+  // Configuración de clics en las tarjetas de certificados para expandir
+  document.querySelectorAll(".certificate-card").forEach(card => {
+    card.addEventListener("click", () => {
+      const title = card.getAttribute("data-title") || "";
+      const imgElem = card.querySelector("img");
+      const currentSrc = imgElem ? (imgElem.currentSrc || imgElem.src) : "";
+      const rotate = card.getAttribute("data-rotate");
+
+      if (certificateModal && modalCertificateImg && modalCertificateTitle) {
+        modalCertificateTitle.textContent = title;
+        modalCertificateImg.src = currentSrc;
+        
+        // Aplica o quita rotación en el modal
+        if (rotate === "90") {
+          modalCertificateImg.classList.add("rotate-90");
+        } else {
+          modalCertificateImg.classList.remove("rotate-90");
+        }
+
+        certificateModal.classList.remove("hidden");
+      }
+    });
+  });
+
+  if (closeCertificateModalBtn && certificateModal) {
+    closeCertificateModalBtn.addEventListener("click", () => {
+      certificateModal.classList.add("hidden");
+    });
+  }
+
+  // Cerrar haciendo clic en el fondo oscuro
+  if (certificateModal) {
+    certificateModal.addEventListener("click", (e) => {
+      if (e.target === certificateModal) {
+        certificateModal.classList.add("hidden");
+      }
+    });
+  }
+
+  // Cerrar con la tecla Escape
+  document.addEventListener("keydown", (e) => {
+    if (e.key === "Escape" && certificateModal && !certificateModal.classList.contains("hidden")) {
+      certificateModal.classList.add("hidden");
+    }
+  });
+
   function syncAdminUI() {
     if (isAdminLogged) {
       if (adminTopBar) adminTopBar.classList.remove("hidden");
@@ -266,6 +316,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     }
   }
 
+  // Switch de Pestañas en Admin
   if (tabTurnosBtn && tabDeudoresBtn) {
     tabTurnosBtn.addEventListener("click", () => {
       tabTurnosBtn.className = "pb-2.5 border-b-2 border-[#A67C52] text-[#A67C52] font-bold transition";
@@ -364,7 +415,6 @@ document.addEventListener("DOMContentLoaded", async () => {
       slotsContainer.innerHTML = `<p class="text-xs text-stone-400 col-span-full py-2 text-center">Consultando disponibilidad...</p>`;
     }
 
-    // Limpieza reactiva de turnos vencidos antes de listar horarios
     await cleanupExpiredAppointments();
 
     const parts = dateStr.split('-');
@@ -578,7 +628,6 @@ document.addEventListener("DOMContentLoaded", async () => {
           status: 'pendiente_sena'
         });
 
-        // Copia automática del alias al portapapeles
         let aliasCopiado = false;
         if (navigator.clipboard && navigator.clipboard.writeText) {
           try {
@@ -736,7 +785,6 @@ document.addEventListener("DOMContentLoaded", async () => {
     if (!adminAppointmentsList) return;
     adminAppointmentsList.innerHTML = `<p class="text-xs text-stone-400 py-6 text-center">Cargando base de datos en tiempo real...</p>`;
 
-    // Limpieza de turnos con más de 12 horas antes de renderizar
     await cleanupExpiredAppointments();
 
     let list = [];
@@ -1001,6 +1049,5 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   syncAdminUI();
   renderCalendar();
-  // Limpieza inicial al abrir la página
   cleanupExpiredAppointments();
 });
